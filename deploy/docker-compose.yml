@@ -1,0 +1,244 @@
+# ============================================================
+#  IT CLUB // LOCAL CTF ARENA — Orchestrator Semua Server Soal
+# ============================================================
+#  Jalankan dari folder ini:   docker compose up -d --build
+#  Lihat log:                  docker compose logs -f
+#  Matikan:                    docker compose down
+#
+#  SEMUA port sengaja sama persis dengan yang tertulis di
+#  deskripsi soal, jadi tidak ada deskripsi yang perlu diedit.
+# ============================================================
+
+name: itclub-ctf
+
+services:
+
+  # ---------------------------------------------------------
+  # ARENA (web CTF kamu) — port 8080 supaya bebas dari :3000
+  # ---------------------------------------------------------
+  arena:
+    build:
+      context: ..
+      dockerfile: deploy/arena.Dockerfile
+    container_name: ctf_arena
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      SERVER_IP: "${SERVER_IP:-}"   # dipakai mengganti <SERVER_IP> di deskripsi
+      ADMIN_USER: "${ADMIN_USER:-admin}"       # username Admin Dashboard (/admin.html)
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"    # kosong = pakai admin123 saat boot pertama
+    volumes:
+      - ../data:/app/data           # edit challenges.json tanpa rebuild
+      - ../challenges:/app/challenges   # tambah lampiran tanpa rebuild
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 0.5
+
+  # ---------------------------------------------------------
+  # WEB EXPLOITATION
+  # ---------------------------------------------------------
+
+  # context = folder target (berisi src/) karena Dockerfile menulis COPY src/...
+  web-04-portal:
+    build:
+      context: ../targets/web-04-portal
+      dockerfile: src/Dockerfile
+    container_name: ctf_web_portal
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASS: CyberNusarootpassword
+      DB_NAME: CyberNusa_db
+      JWT_SECRET: CyberNusaSuperSecretKey_DoNotShare
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+
+  # MySQL TIDAK dipublikasikan ke internet — cuma bisa diakses
+  # container web. Flag ada di init.sql, jangan dibuka 3306.
+  db:
+    image: mysql:8.0
+    container_name: ctf_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: CyberNusarootpassword
+      MYSQL_DATABASE: CyberNusa_db
+    volumes:
+      - ../targets/web-04-portal/src/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 20s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+
+  web-05-swag:
+    build:
+      context: ../targets/web-05-swag/src
+      dockerfile: Dockerfile
+    container_name: ctf_web_swag
+    ports:
+      - "4000:4000"
+    volumes:
+      - ../targets/web-05-swag/src/app:/app
+    environment:
+      JWT_SECRET: CYBERNUSA_SUPER_SECRET_KEY
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 0.5
+
+  web-06-merchtech:
+    build:
+      context: ../targets/web-06-merchtech/src
+      dockerfile: Dockerfile
+    container_name: ctf_web_merchtech
+    ports:
+      - "5000:5000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 0.5
+
+  web-03-landing:
+    build:
+      context: ../targets/web-03-landing/src/app
+      dockerfile: Dockerfile
+    container_name: ctf_web_landing
+    ports:
+      - "6060:3000"
+    environment:
+      FLAG: "ITCLUB{N3xtJ5_1m4g3_0pt1m1z4t10n_55RF_M4st3r}"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1.0
+
+  # ---------------------------------------------------------
+  # BINARY EXPLOITATION (socat -> biner ELF)
+  # ---------------------------------------------------------
+  pwn-01-admin-panel:
+    build:
+      context: ../targets/pwn-01-admin-panel
+      dockerfile: src/Dockerfile
+    container_name: ctf_pwn_01
+    ports:
+      - "9001:9001"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+  pwn-02-feedback-portal:
+    build:
+      context: ../targets/pwn-02-feedback-portal
+      dockerfile: src/Dockerfile
+    container_name: ctf_pwn_02
+    ports:
+      - "9002:9002"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+  pwn-03-weapon-shop:
+    build:
+      context: ../targets/pwn-03-weapon-shop
+      dockerfile: src/Dockerfile
+    container_name: ctf_pwn_03
+    ports:
+      - "9003:9003"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ---------------------------------------------------------
+  # CRYPTOGRAPHY (validator interaktif)
+  # ---------------------------------------------------------
+  cr-03-twin-anomaly:
+    build:
+      context: ../targets/cr-03-twin-anomaly/src
+      dockerfile: Dockerfile
+    container_name: ctf_crypto_03
+    ports:
+      - "1337:1337"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ---------------------------------------------------------
+  # DIGITAL FORENSICS (checker interaktif — wajib, tanpa ini
+  # soal df-01/02/03 tidak bisa diselesaikan)
+  # ---------------------------------------------------------
+  df-01-get-tracked:
+    build:
+      context: ../targets/df-01-get-tracked
+      dockerfile: Dockerfile
+    container_name: ctf_forensics_01
+    ports:
+      - "10001:10001"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+  df-02-silent-cipher:
+    build:
+      context: ../targets/df-02-silent-cipher
+      dockerfile: Dockerfile
+    container_name: ctf_forensics_02
+    ports:
+      - "10002:10002"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+  df-03-exfiltration-route:
+    build:
+      context: ../targets/df-03-exfiltration-route/src
+      dockerfile: Dockerfile
+    container_name: ctf_forensics_03
+    ports:
+      - "10003:10003"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: ["ALL"]
+    mem_limit: 256m
+    cpus: 0.5
+
+volumes:
+  mysql_data:

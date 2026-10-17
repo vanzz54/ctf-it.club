@@ -1,0 +1,23 @@
+{
+  "users": {
+    "evan": {
+      "username": "Evan",
+      "name": "Evan Pratama Putra",
+      "salt": "7e7e8e12699128a074ed338c59b699df",
+      "hash": "eefe789730a899cd1648836d7ecbed1f89c760b0277bc1e5252e7bc3d4a3533e",
+      "score": 0,
+      "solved": [],
+      "createdAt": 1792152298990
+    },
+    "admin": {
+      "username": "admin",
+      "name": "Administrator",
+      "salt": "e60b27b965c499e072a0932effba5ed0",
+      "hash": "a387b2edf6d8a0bf7314ef627f41df7b560add5610aa556aa058e9c0fb3adef4",
+      "score": 0,
+      "solved": [],
+      "role": "admin",
+      "createdAt": 1792153620749
+    }
+  }
+}

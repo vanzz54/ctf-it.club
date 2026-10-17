@@ -1,0 +1,24 @@
+{
+  "name": "itclub-local-ctf-arena",
+  "version": "1.0.0",
+  "description": "Platform web CTF lokal yang ringan untuk latihan member IT Club",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ctf",
+    "capture-the-flag",
+    "itclub",
+    "express",
+    "web"
+  ],
+  "author": "IT Club",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

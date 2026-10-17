@@ -1,0 +1,17 @@
+MEMO INTERNAL - DIVISI CRYPTO
+================================
+Dari : Kaisar Julius
+Untuk: Anak-anak IT Club
+
+Pesan ini sempat aku kirim lewat jalur publik sebelum akhirnya
+aku tutup dengan sandi. Aku tidak ingat lagi berapa langkah
+yang aku pakai waktu itu... yang pasti angkanya kecil, genap,
+dan berkaitan dengan hari dalam seminggu.
+
+Coba saja tebak semua kemungkinan sampai ketemu.
+
+--- PESAN TERENKRIPSI ---
+VGPYHO{e0g13_z4x3f_gu3_j0eyq_t0_e0haq}
+--- AKHIR PESAN ---
+
+(bonus: kalau sudah paham, hitung juga jumlah huruf vokal di pesan asli)
