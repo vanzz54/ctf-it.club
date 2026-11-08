@@ -206,15 +206,96 @@ const crypto = require('crypto');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const SECRET_FILE = path.join(__dirname, 'data', 'secret.key');
 
-let SESSION_SECRET = '';
-try {
-  SESSION_SECRET = fs.readFileSync(SECRET_FILE, 'utf-8').trim();
-} catch (e) {
-  SESSION_SECRET = crypto.randomBytes(32).toString('hex');
+let SESSION_SECRET = (process.env.SESSION_SECRET || '').trim();
+if (!SESSION_SECRET) {
   try {
-    fs.writeFileSync(SECRET_FILE, SESSION_SECRET, { mode: 0o600 });
-  } catch (e2) {
-    console.error('[AUTH] Gagal menyimpan secret.key ->', e2.message);
+    SESSION_SECRET = fs.readFileSync(SECRET_FILE, 'utf-8').trim();
+  } catch (e) {
+    SESSION_SECRET = 'ctf-arena-secret-key-smkn2banjar-2026';
+    try {
+      fs.writeFileSync(SECRET_FILE, SESSION_SECRET, { mode: 0o600 });
+    } catch (e2) {}
+  }
+}
+
+/* --- Upstash Redis Cloud Integration (untuk Vercel Serverless Sync) --- */
+const UPSTASH_URL = (process.env.UPSTASH_REDIS_REST_URL || '').trim().replace(/\/$/, '');
+const UPSTASH_TOKEN = (process.env.UPSTASH_REDIS_REST_TOKEN || '').trim();
+const isUpstashEnabled = Boolean(UPSTASH_URL && UPSTASH_TOKEN);
+
+if (isUpstashEnabled) {
+  console.log('[REDIS] Upstash Redis terdeteksi - sinkronisasi Live Leaderboard cloud aktif.');
+} else {
+  console.log('[LOCAL] Upstash Redis tidak diset - menggunakan data/users.json lokal.');
+}
+
+async function redisCommand(commandArray) {
+  if (!isUpstashEnabled) return null;
+  try {
+    const res = await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + UPSTASH_TOKEN,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(commandArray),
+    });
+    const data = await res.json();
+    return data && data.result !== undefined ? data.result : null;
+  } catch (err) {
+    console.error('[REDIS] Komunikasi ke Upstash gagal:', err.message);
+    return null;
+  }
+}
+
+async function syncUsersFromRedis() {
+  if (!isUpstashEnabled) return;
+  try {
+    const raw = await redisCommand(['GET', 'ctf:users']);
+    if (!raw) return;
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (parsed && typeof parsed === 'object') {
+      const sourceUsers = parsed.users || parsed;
+      for (const [key, u] of Object.entries(sourceUsers)) {
+        const lowerKey = key.toLowerCase();
+        const existing = users.get(lowerKey);
+        users.set(lowerKey, {
+          username: String(u.username || lowerKey),
+          name: String(u.name || u.username || lowerKey),
+          salt: String(u.salt || ''),
+          hash: String(u.hash || ''),
+          score: Number(u.score) || 0,
+          solved: new Set(Array.isArray(u.solved) ? u.solved.map(String) : []),
+          role: u.role === 'admin' ? 'admin' : 'user',
+          createdAt: Number(u.createdAt) || Date.now(),
+          lastSubmit: existing ? existing.lastSubmit : 0,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[REDIS] Gagal membaca data users dari Upstash:', err.message);
+  }
+}
+
+async function saveUsersToRedis() {
+  if (!isUpstashEnabled) return;
+  try {
+    const obj = { users: {} };
+    for (const [key, u] of users) {
+      obj.users[key] = {
+        username: u.username,
+        name: u.name,
+        salt: u.salt,
+        hash: u.hash,
+        score: u.score,
+        solved: [...u.solved],
+        role: u.role === 'admin' ? 'admin' : undefined,
+        createdAt: u.createdAt,
+      };
+    }
+    await redisCommand(['SET', 'ctf:users', JSON.stringify(obj)]);
+  } catch (err) {
+    console.error('[REDIS] Gagal menyimpan data users ke Upstash:', err.message);
   }
 }
 
@@ -243,7 +324,7 @@ function loadUsers() {
   console.log(`[AUTH] ${users.size} user terdaftar dimuat dari data/users.json`);
 }
 
-function saveUsers() {
+async function saveUsers() {
   const obj = { users: {} };
   for (const [key, u] of users) {
     obj.users[key] = {
@@ -260,7 +341,10 @@ function saveUsers() {
   try {
     fs.writeFileSync(USERS_FILE, JSON.stringify(obj, null, 2) + '\n');
   } catch (e) {
-    console.error('[AUTH] Gagal menyimpan users.json ->', e.message);
+    // Di Vercel serverless, filesystem read-only diabaikan
+  }
+  if (isUpstashEnabled) {
+    await saveUsersToRedis();
   }
 }
 
@@ -436,7 +520,8 @@ app.use('/api/submit', rateLimit(60000, 30));
  *    Mengembalikan daftar soal TANPA field flag.
  *    Query opsional ?user=<nickname> untuk menandai soal yg sudah selesai.
  * ------------------------------------------------------------- */
-app.get('/api/challenges', (req, res) => {
+app.get('/api/challenges', async (req, res) => {
+  if (isUpstashEnabled) await syncUsersFromRedis();
   const player =
     authFrom(req) ||
     (typeof req.query.user === 'string' && req.query.user.trim()
@@ -468,7 +553,8 @@ app.get('/api/challenges', (req, res) => {
 /* ---------------------------------------------------------------
  * 5a. API: POST /api/register  { name, username, password }
  * ------------------------------------------------------------- */
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
+  if (isUpstashEnabled) await syncUsersFromRedis();
   const body = req.body || {};
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const username = typeof body.username === 'string' ? body.username.trim() : '';
@@ -506,7 +592,7 @@ app.post('/api/register', (req, res) => {
     lastSubmit: 0,
   };
   users.set(key, user);
-  saveUsers();
+  await saveUsers();
 
   console.log(`[AUTH] register ${username} (${name})`);
   res.status(201).json({
@@ -520,7 +606,8 @@ app.post('/api/register', (req, res) => {
 /* ---------------------------------------------------------------
  * 5b. API: POST /api/login  { username, password }
  * ------------------------------------------------------------- */
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
+  if (isUpstashEnabled) await syncUsersFromRedis();
   const body = req.body || {};
   const username = typeof body.username === 'string' ? body.username.trim() : '';
   const password = typeof body.password === 'string' ? body.password : '';
@@ -548,7 +635,8 @@ app.post('/api/login', (req, res) => {
  * 5c. API: POST /api/submit
  *    Body: { token, challengeId, flag } â€” WAJIB login (token sesi).
  * ------------------------------------------------------------- */
-app.post('/api/submit', (req, res) => {
+app.post('/api/submit', async (req, res) => {
+  if (isUpstashEnabled) await syncUsersFromRedis();
   const body = req.body || {};
   const player = authFrom(req);
   if (!player) {
@@ -617,7 +705,7 @@ app.post('/api/submit', (req, res) => {
     // agar skor kompetisi peserta tidak terpengaruh oleh akun Admin.
     const isAdminSubmit = player.role === 'admin';
     if (!isAdminSubmit) player.score += challenge.points;
-    saveUsers(); // skor & solved ikut bertahan di data/users.json
+    await saveUsers(); // skor & solved ikut bertahan di data/users.json
     logAudit({
       username: player.username,
       challengeId: challenge.id,
@@ -1033,7 +1121,8 @@ app.delete('/api/admin/users/:username', requireAdmin, (req, res) => {
 });
 
 /* --- Reset leaderboard untuk sesi kompetisi baru --- */
-app.post('/api/admin/leaderboard/reset', requireAdmin, (req, res) => {
+app.post('/api/admin/leaderboard/reset', requireAdmin, async (req, res) => {
+  if (isUpstashEnabled) await syncUsersFromRedis();
   let n = 0;
   for (const u of users.values()) {
     u.score = 0;
@@ -1055,7 +1144,12 @@ app.get('/api/admin/audit', requireAdmin, (req, res) => {
 /* ---------------------------------------------------------------
  * 6. API: GET /api/leaderboard
  * ------------------------------------------------------------- */
-app.get('/api/leaderboard', (req, res) => {
+app.get('/api/leaderboard', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  if (isUpstashEnabled) await syncUsersFromRedis();
+
   const ranked = Array.from(users.values())
     // ðŸ”’ Akun Admin TIDAK masuk peringkat kompetisi peserta â€” difilter di sisi
     //    server, lalu difilter ulang oleh frontend (index.html â†’ loadLeaderboard).

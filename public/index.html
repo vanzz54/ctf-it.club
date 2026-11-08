@@ -1132,8 +1132,8 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
     async function loadChallenges() {
       try {
         const url = state.token
-          ? `/api/challenges?token=${encodeURIComponent(state.token)}`
-          : '/api/challenges';
+          ? `/api/challenges?token=${encodeURIComponent(state.token)}&_t=` + Date.now()
+          : '/api/challenges?_t=' + Date.now();
         const { data } = await api(url);
         state.challenges = data.challenges || [];
 
@@ -1150,7 +1150,7 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
 
     async function loadLeaderboard() {
       try {
-        const { data } = await api('/api/leaderboard');
+        const { data } = await api('/api/leaderboard?_t=' + Date.now());
         const allUsers = data.leaderboard || [];
 
         // 🔒 FILTER AKUN ADMIN — tidak boleh masuk daftar peringkat peserta.
