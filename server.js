@@ -42,7 +42,7 @@ function detectViaRoute(timeoutMs = 1500) {
     };
 
     try {
-      // Socket UDP tidak mengirim paket apa pun — kernel hanya memilih
+      // Socket UDP tidak mengirim paket apa pun â€” kernel hanya memilih
       // IP source untuk rute menuju 8.8.8.8. Itulah IP yang benar-benar
       // dipakai mesin ini untuk keluar ke jaringan.
       sock = require('dgram').createSocket('udp4');
@@ -104,6 +104,52 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const CHALLENGES_DIR = path.join(__dirname, 'challenges');
 const DATA_FILE = path.join(__dirname, 'data', 'challenges.json');
 
+/**
+ * Mencari lokasi fisik file soal di dalam CHALLENGES_DIR.
+ * Mendukung pencarian di root challenges maupun di dalam subfolder (crypto, web, pwn, osint, forensics).
+ * Dilengkapi proteksi path traversal.
+ */
+function findChallengeFile(targetName) {
+  if (!targetName || typeof targetName !== 'string') return null;
+  const decoded = decodeURIComponent(targetName).trim();
+  const safeBase = path.basename(decoded);
+  if (!safeBase || safeBase === '.' || safeBase.includes('..')) return null;
+
+  // 1. Cek langsung di root folder challenges
+  const directPath = path.join(CHALLENGES_DIR, safeBase);
+  if (fs.existsSync(directPath) && fs.statSync(directPath).isFile()) {
+    return directPath;
+  }
+
+  // 2. Cek jika path yang diminta berupa subpath relatif yang valid
+  const directRelPath = path.join(CHALLENGES_DIR, decoded);
+  if (directRelPath.startsWith(CHALLENGES_DIR) && fs.existsSync(directRelPath) && fs.statSync(directRelPath).isFile()) {
+    return directRelPath;
+  }
+
+  // 3. Pencarian rekursif di seluruh subfolder (web, crypto, forensics, osint, pwn)
+  function searchDir(dir) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return null;
+    }
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        const found = searchDir(fullPath);
+        if (found) return found;
+      } else if (entry.isFile() && entry.name.toLowerCase() === safeBase.toLowerCase()) {
+        return fullPath;
+      }
+    }
+    return null;
+  }
+
+  return searchDir(CHALLENGES_DIR);
+}
+
 let CHALLENGES = [];
 
 function loadChallenges() {
@@ -116,7 +162,7 @@ function loadChallenges() {
     }
 
     CHALLENGES = parsed.map((c) => {
-      // "file" tunggal atau "files" (array) — keduanya didukung
+      // "file" tunggal atau "files" (array) â€” keduanya didukung
       let files = Array.isArray(c.files) ? c.files.filter(Boolean) : [];
       if (!files.length && c.file) files = [c.file];
 
@@ -133,7 +179,7 @@ function loadChallenges() {
         disabled: c.disabled === true, // soal disembunyikan dari peserta bila true
         url: c.url || null, // link eksternal, mis. OVA di Google Drive
         flag: String(c.flag || ''),
-        // Petunjuk format flag untuk UI — hanya prefix, bukan isi flag.
+        // Petunjuk format flag untuk UI â€” hanya prefix, bukan isi flag.
         // Semua soal kini memakai format ITCLUB (konversi penuh dari format lama).
         flagFormat: /^ITCLUB\{/i.test(String(c.flag || '')) ? 'ITCLUB' : 'LKS',
       };
@@ -151,7 +197,7 @@ loadChallenges();
 /* ---------------------------------------------------------------
  * 2. Auth & User Store (persisten di data/users.json)
  *    - Password di-hash dengan scrypt + salt acak (tidak pernah disimpan plain).
- *    - Token sesi = "<user-key>.<HMAC-SHA256(secret, user-key|salt)>" —
+ *    - Token sesi = "<user-key>.<HMAC-SHA256(secret, user-key|salt)>" â€”
  *      stateless, sehingga tetap valid walau server di-restart.
  *    - Leaderboard kini bersumber dari user terdaftar.
  * ------------------------------------------------------------- */
@@ -192,7 +238,7 @@ function loadUsers() {
       });
     }
   } catch (e) {
-    /* file belum ada — mulai dengan user kosong */
+    /* file belum ada â€” mulai dengan user kosong */
   }
   console.log(`[AUTH] ${users.size} user terdaftar dimuat dari data/users.json`);
 }
@@ -231,7 +277,7 @@ function ensureAdmin() {
   const key = adminUser.toLowerCase();
 
   if (users.has(key)) {
-    // username sudah dipakai peserta biasa → naikkan role-nya
+    // username sudah dipakai peserta biasa â†’ naikkan role-nya
     const u = users.get(key);
     u.role = 'admin';
     saveUsers();
@@ -315,17 +361,25 @@ app.use(express.json({ limit: '256kb' }));
 // Static: frontend SPA
 app.use(express.static(PUBLIC_DIR));
 
-// Static: file attachment soal (diakses sebagai /challenges/<nama-file>)
-app.use(
-  '/challenges',
-  express.static(CHALLENGES_DIR, {
-    fallthrough: false,
-    setHeaders: (res) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('Cache-Control', 'public, max-age=0');
-    },
-  })
-);
+// Rute download lampiran soal (diakses sebagai /challenges/<nama-file>)
+// Mendukung pencarian file dinamis baik langsung di root maupun dalam subfolder kategori
+app.get('/challenges/:filename(*)', (req, res) => {
+  const reqFile = req.params.filename;
+  if (!reqFile) return res.status(404).send('File tidak ditemukan.');
+
+  const resolved = findChallengeFile(reqFile);
+  if (!resolved) {
+    return res.status(404).send('File lampiran soal tidak ditemukan di server.');
+  }
+
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'public, max-age=0');
+  return res.download(resolved, path.basename(resolved), (err) => {
+    if (err && !res.headersSent) {
+      res.status(500).send('Gagal mengunduh file.');
+    }
+  });
+});
 
 // Logger sederhana
 app.use((req, res, next) => {
@@ -338,7 +392,7 @@ app.use((req, res, next) => {
 });
 
 /* ---------------------------------------------------------------
- * Rate limit sederhana (in-memory) — arena dipublikasikan ke
+ * Rate limit sederhana (in-memory) â€” arena dipublikasikan ke
  * internet, jadi jangan biarkan skrip membanjiri API.
  * ------------------------------------------------------------- */
 const rateBuckets = new Map();
@@ -373,7 +427,7 @@ setInterval(() => {
   }
 }, 60000).unref();
 
-// API umum: 300 req/menit per IP — submit: 30 req/menit per IP
+// API umum: 300 req/menit per IP â€” submit: 30 req/menit per IP
 app.use('/api', rateLimit(60000, 300));
 app.use('/api/submit', rateLimit(60000, 30));
 
@@ -403,7 +457,7 @@ app.get('/api/challenges', (req, res) => {
       file: c.files[0] || null,
       downloadUrl: downloadUrls[0] || null,
       externalUrl: c.url, // link eksternal (Google Drive dsb.)
-      flagFormat: c.flagFormat, // selalu 'ITCLUB' — hanya prefix, isi flag tidak ikut
+      flagFormat: c.flagFormat, // selalu 'ITCLUB' â€” hanya prefix, isi flag tidak ikut
       solved: player ? player.solved.has(c.id) : false,
     };
   });
@@ -421,12 +475,12 @@ app.post('/api/register', (req, res) => {
   const password = typeof body.password === 'string' ? body.password : '';
 
   if (name.length < 2 || name.length > 40) {
-    return res.status(400).json({ success: false, message: 'Nama lengkap harus 2–40 karakter.' });
+    return res.status(400).json({ success: false, message: 'Nama lengkap harus 2â€“40 karakter.' });
   }
   if (!USER_RE.test(username)) {
     return res.status(400).json({
       success: false,
-      message: 'Username: 3–24 karakter, hanya huruf, angka, dan underscore.',
+      message: 'Username: 3â€“24 karakter, hanya huruf, angka, dan underscore.',
     });
   }
   if (password.length < 6 || password.length > 72) {
@@ -492,7 +546,7 @@ app.post('/api/login', (req, res) => {
 
 /* ---------------------------------------------------------------
  * 5c. API: POST /api/submit
- *    Body: { token, challengeId, flag } — WAJIB login (token sesi).
+ *    Body: { token, challengeId, flag } â€” WAJIB login (token sesi).
  * ------------------------------------------------------------- */
 app.post('/api/submit', (req, res) => {
   const body = req.body || {};
@@ -559,7 +613,7 @@ app.post('/api/submit', (req, res) => {
 
   if (flag === challenge.flag) {
     player.solved.add(challenge.id);
-    // PENGUJIAN ADMIN: solved tetap dicatat (kartu ✓), tapi poin TIDAK ditambahkan
+    // PENGUJIAN ADMIN: solved tetap dicatat (kartu âœ“), tapi poin TIDAK ditambahkan
     // agar skor kompetisi peserta tidak terpengaruh oleh akun Admin.
     const isAdminSubmit = player.role === 'admin';
     if (!isAdminSubmit) player.score += challenge.points;
@@ -574,14 +628,14 @@ app.post('/api/submit', (req, res) => {
 
     console.log(
       isAdminSubmit
-        ? `[SCORE] ${player.username} benar pada ${challenge.id} (ADMIN — poin tidak dihitung)`
+        ? `[SCORE] ${player.username} benar pada ${challenge.id} (ADMIN â€” poin tidak dihitung)`
         : `[SCORE] ${player.username} benar pada ${challenge.id} (+${challenge.points}) => ${player.score}`
     );
 
     return res.status(200).json({
       success: true,
       message: isAdminSubmit
-        ? 'FLAG BENAR! 🛡️ Mode Admin — poin TIDAK dihitung untuk kompetisi peserta.'
+        ? 'FLAG BENAR! ðŸ›¡ï¸ Mode Admin â€” poin TIDAK dihitung untuk kompetisi peserta.'
         : `FLAG BENAR! +${challenge.points} poin untuk ${player.username}.`,
       points: isAdminSubmit ? 0 : challenge.points,
       score: player.score,
@@ -627,7 +681,7 @@ function loadAudit() {
       .filter(Boolean)
       .slice(-AUDIT_MAX);
   } catch (e) {
-    /* file belum ada — mulai dari kosong */
+    /* file belum ada â€” mulai dari kosong */
   }
 }
 
@@ -651,7 +705,7 @@ loadAudit();
 console.log(`[AUDIT] ${AUDIT.length} entri submisi dimuat`);
 
 /* ---------------------------------------------------------------
- * 5e. ADMIN API — semua endpoint di bawah WAJIB role 'admin'
+ * 5e. ADMIN API â€” semua endpoint di bawah WAJIB role 'admin'
  *     (dilindungi requireAdmin; token sesi biasa tidak cukup)
  * ------------------------------------------------------------- */
 function requireAdmin(req, res, next) {
@@ -721,7 +775,7 @@ function validateChallengeInput(body, { partial = false } = {}) {
 
   if (body.title !== undefined) {
     const t = String(body.title || '').trim();
-    if (t.length < 3 || t.length > 120) errors.push('Judul soal harus 3–120 karakter.');
+    if (t.length < 3 || t.length > 120) errors.push('Judul soal harus 3â€“120 karakter.');
     out.title = t;
   }
   if (body.category !== undefined) {
@@ -734,7 +788,7 @@ function validateChallengeInput(body, { partial = false } = {}) {
   }
   if (body.points !== undefined) {
     const p = Number(body.points);
-    if (!Number.isInteger(p) || p < 0 || p > 99999) errors.push('Poin harus bilangan bulat 0–99999.');
+    if (!Number.isInteger(p) || p < 0 || p > 99999) errors.push('Poin harus bilangan bulat 0â€“99999.');
     out.points = p;
   }
   if (body.description !== undefined) {
@@ -767,7 +821,7 @@ function validateChallengeInput(body, { partial = false } = {}) {
       const ext = (name.split('.').pop() || '').toLowerCase();
       if (!SAFE_NAME_RE.test(name) || name.includes('..')) errors.push('Nama file lampiran tidak valid.');
       else if (!ALLOWED_EXT.has(ext)) errors.push(`Ekstensi .${ext} tidak didukung.`);
-      else if (!fs.existsSync(path.join(CHALLENGES_DIR, name))) {
+      else if (!findChallengeFile(name)) {
         errors.push(`File lampiran belum ter-upload: ${name}`);
       }
       out.files = [name];
@@ -990,7 +1044,7 @@ app.post('/api/admin/leaderboard/reset', requireAdmin, (req, res) => {
   saveUsers();
 
   console.log(`[ADMIN] ${req.admin.username} mereset leaderboard (${n} akun -> 0 poin)`);
-  res.json({ success: true, message: `Leaderboard direset — ${n} akun kembali ke 0 poin.` });
+  res.json({ success: true, message: `Leaderboard direset â€” ${n} akun kembali ke 0 poin.` });
 });
 
 /* --- Riwayat submisi flag (audit log) --- */
@@ -1003,8 +1057,8 @@ app.get('/api/admin/audit', requireAdmin, (req, res) => {
  * ------------------------------------------------------------- */
 app.get('/api/leaderboard', (req, res) => {
   const ranked = Array.from(users.values())
-    // 🔒 Akun Admin TIDAK masuk peringkat kompetisi peserta — difilter di sisi
-    //    server, lalu difilter ulang oleh frontend (index.html → loadLeaderboard).
+    // ðŸ”’ Akun Admin TIDAK masuk peringkat kompetisi peserta â€” difilter di sisi
+    //    server, lalu difilter ulang oleh frontend (index.html â†’ loadLeaderboard).
     .filter((p) => p.role !== 'admin' && String(p.username || '').toLowerCase() !== 'admin')
     .map((p) => ({
       username: p.username,
@@ -1042,7 +1096,7 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/') || req.path.startsWith('/challenges/')) {
     return next();
   }
-  // Path berekstensi (.json/.js/.txt dst) TIDAK boleh dibalas index.html —
+  // Path berekstensi (.json/.js/.txt dst) TIDAK boleh dibalas index.html â€”
   // biar jelas 404, bukan seolah-olah file itu ada.
   if (path.extname(req.path)) {
     return next();
@@ -1050,10 +1104,10 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 
-// AI Tutor Route — BASE /api/ai-tutor
-// ———— Tambahkan require di awal: const aiTutorRouter = require('./routes/ai-tutor'); ————
-// ———— Semua endpoint: POST /api/ai-tutor , POST /api/ai-tutor/hint ————
-// ———— Rate-limiting: 5 req/menit/user, 20 req/menit/IP ————
+// AI Tutor Route â€” BASE /api/ai-tutor
+// â€”â€”â€”â€” Tambahkan require di awal: const aiTutorRouter = require('./routes/ai-tutor'); â€”â€”â€”â€”
+// â€”â€”â€”â€” Semua endpoint: POST /api/ai-tutor , POST /api/ai-tutor/hint â€”â€”â€”â€”
+// â€”â€”â€”â€” Rate-limiting: 5 req/menit/user, 20 req/menit/IP â€”â€”â€”â€”
 const aiTutorRouter = require('./routes/ai-tutor');
 app.use('/api/ai-tutor', aiTutorRouter);
 
@@ -1078,7 +1132,7 @@ initServerIp()
       console.log(`  Server IP (untuk <SERVER_IP>): ${SERVER_IP}`);
       console.log(`  Challenges  : ${CHALLENGES.length}`);
       console.log(`  Users       : ${users.size} terdaftar`);
-      console.log('  Admin       : /admin.html (AKUN DEFAULT admin/admin123 — ubah via env)');
+      console.log('  Admin       : /admin.html (AKUN DEFAULT admin/admin123 â€” ubah via env)');
       console.log('  Run "npm install && npm start" untuk memulai.');
       console.log('==================================================');
     });
