@@ -254,7 +254,7 @@
           <div id="filter-bar" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
         </div>
 
-        <div id="challenge-grid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4"></div>
+        <div id="challenge-grid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4 items-start"></div>
 
         <div id="challenge-empty" class="hidden rounded-2xl border border-dashed border-white/12 px-6 py-10 text-center text-[13px] text-muted">
           Tidak ada tantangan pada kategori ini.
@@ -975,7 +975,7 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
       if (!btn) return;
       const card = btn.closest('[data-card]');
       const id = card.dataset.card;
-      const body = document.getElementById('desc-' + id);
+      const body = card.querySelector('.acc-body') || document.getElementById('desc-' + id);
       const open = btn.getAttribute('aria-expanded') === 'true';
 
       btn.setAttribute('aria-expanded', String(!open));
@@ -983,6 +983,15 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
       if (open) {
         state.openCards.delete(id);
       } else {
+        $('#challenge-grid').querySelectorAll('.card[data-card]').forEach((c) => {
+          if (c !== card) {
+            const oBtn = c.querySelector('.acc-toggle');
+            const oBody = c.querySelector('.acc-body');
+            if (oBtn) oBtn.setAttribute('aria-expanded', 'false');
+            if (oBody) oBody.classList.remove('open');
+            state.openCards.delete(c.dataset.card);
+          }
+        });
         state.openCards.add(id);
         if (window.setAiChatChallenge) window.setAiChatChallenge(id);
       }
