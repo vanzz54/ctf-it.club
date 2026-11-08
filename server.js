@@ -259,15 +259,20 @@ async function syncUsersFromRedis() {
       for (const [key, u] of Object.entries(sourceUsers)) {
         const lowerKey = key.toLowerCase();
         const existing = users.get(lowerKey);
+        // Jangan pernah menimpa salt/hash lokal dengan nilai kosong dari Redis.
+        // Salt kosong membuat authFrom() menolak token yang sebenarnya valid
+        // (gejala: peserta ter-logout otomatis saat submit flag).
+        const salt = String(u.salt || (existing && existing.salt) || '');
+        const hash = String(u.hash || (existing && existing.hash) || '');
         users.set(lowerKey, {
-          username: String(u.username || lowerKey),
-          name: String(u.name || u.username || lowerKey),
-          salt: String(u.salt || ''),
-          hash: String(u.hash || ''),
-          score: Number(u.score) || 0,
-          solved: new Set(Array.isArray(u.solved) ? u.solved.map(String) : []),
-          role: u.role === 'admin' ? 'admin' : 'user',
-          createdAt: Number(u.createdAt) || Date.now(),
+          username: String(u.username || (existing && existing.username) || lowerKey),
+          name: String(u.name || u.username || (existing && existing.name) || lowerKey),
+          salt,
+          hash,
+          score: Number.isFinite(Number(u.score)) ? Number(u.score) : (existing ? existing.score : 0),
+          solved: new Set(Array.isArray(u.solved) ? u.solved.map(String) : (existing ? existing.solved : [])),
+          role: u.role === 'admin' || (existing && existing.role === 'admin') ? 'admin' : 'user',
+          createdAt: Number(u.createdAt) || (existing ? existing.createdAt : Date.now()),
           lastSubmit: existing ? existing.lastSubmit : 0,
         });
       }
@@ -390,7 +395,11 @@ function ensureAdmin() {
 
 const hashPassword = (pw, salt) => crypto.scryptSync(String(pw), salt, 32).toString('hex');
 
-ensureAdmin(); // pastikan selalu ada role Admin untuk /admin.html
+/* ensureAdmin() sengaja TIDAK dipanggil di sini. Pada deployment dengan
+ * Upstash Redis, memanggilnya sebelum syncUsersFromRedis() bisa menulis
+ * ulang Redis hanya berisi akun admin dan menghapus akun peserta — yang
+ * berujung pada token peserta menjadi tidak valid (auto-logout saat submit).
+ * Pemanggilan dipindah ke bootstrapUsers() saat server start. */
 
 function signToken(key, salt) {
   return crypto.createHmac('sha256', SESSION_SECRET).update(`${key}|${salt}`).digest('hex');
@@ -414,8 +423,8 @@ const pubUser = (u) => ({
   role: u.role === 'admin' ? 'admin' : 'user', // dipakai gerbang Admin Dashboard
 });
 
-/** Ambil user dari token (body.token / Authorization: Bearer / ?token=). */
-function authFrom(req) {
+/** Ambil token dari body / Authorization: Bearer / ?token=. */
+function extractToken(req) {
   let token = '';
   const body = req.body || {};
   if (typeof body.token === 'string') token = body.token.trim();
@@ -424,15 +433,32 @@ function authFrom(req) {
     if (h.startsWith('Bearer ')) token = h.slice(7).trim();
   }
   if (!token && typeof req.query.token === 'string') token = req.query.token.trim();
-  if (!token) return null;
+  return token;
+}
 
+/**
+ * Validasi token dan kembalikan alasan kegagalannya.
+ * reason: 'missing' | 'malformed' | 'unknown_user' | 'bad_signature' | null
+ */
+function authInfo(req) {
+  const token = extractToken(req);
+  if (!token) return { user: null, reason: 'missing' };
   const dot = token.indexOf('.');
-  if (dot < 1) return null;
+  if (dot < 1) return { user: null, reason: 'malformed' };
   const key = token.slice(0, dot).toLowerCase();
   const sig = token.slice(dot + 1);
+  if (!sig) return { user: null, reason: 'malformed' };
   const user = users.get(key);
-  if (!user || !user.salt) return null;
-  return safeEqualHex(sig, signToken(key, user.salt)) ? user : null;
+  if (!user || !user.salt) return { user: null, reason: 'unknown_user' };
+  if (!safeEqualHex(sig, signToken(key, user.salt))) {
+    return { user: null, reason: 'bad_signature' };
+  }
+  return { user, reason: null };
+}
+
+/** Ambil user dari token (body.token / Authorization: Bearer / ?token=). */
+function authFrom(req) {
+  return authInfo(req).user;
 }
 
 /* ---------------------------------------------------------------
@@ -638,14 +664,22 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/submit', async (req, res) => {
   if (isUpstashEnabled) await syncUsersFromRedis();
   const body = req.body || {};
-  const player = authFrom(req);
-  if (!player) {
+  const auth = authInfo(req);
+  if (!auth.user) {
+    // Bedakan token yang benar-benar rusak/kedaluwarsa dari masalah sementara.
+    // Frontend hanya boleh menghapus sesi bila sessionExpired === true.
+    const expired = auth.reason === 'malformed' || auth.reason === 'bad_signature' || auth.reason === 'unknown_user';
     return res.status(401).json({
       success: false,
       authRequired: true,
-      message: 'Sesi berakhir atau belum login. Silakan login terlebih dahulu untuk mengirimkan flag!',
+      sessionExpired: expired,
+      authReason: auth.reason,
+      message: expired
+        ? 'Sesi login tidak valid atau sudah kedaluwarsa. Silakan login ulang.'
+        : 'Token sesi tidak dikirim. Silakan login terlebih dahulu untuk mengirimkan flag!',
     });
   }
+  const player = auth.user;
 
   const challengeId = typeof body.challengeId === 'string' ? body.challengeId.trim() : '';
   const flag = typeof body.flag === 'string' ? body.flag.trim() : '';
@@ -750,6 +784,30 @@ app.post('/api/submit', async (req, res) => {
     success: false,
     message: formatHint,
     score: player.score,
+  });
+});
+
+/* ---------------------------------------------------------------
+ * 5c-2. API: GET/POST /api/session
+ *    Cek validitas token tanpa mengubah state apa pun. Dipakai
+ *    frontend saat load & sebelum menghapus sesi lokal.
+ * ------------------------------------------------------------- */
+app.all('/api/session', async (req, res) => {
+  if (isUpstashEnabled) await syncUsersFromRedis();
+  const auth = authInfo(req);
+  if (!auth.user) {
+    return res.status(401).json({
+      success: false,
+      valid: false,
+      authReason: auth.reason,
+      sessionExpired: auth.reason === 'malformed' || auth.reason === 'bad_signature' || auth.reason === 'unknown_user',
+    });
+  }
+  return res.json({
+    success: true,
+    valid: true,
+    user: pubUser(auth.user),
+    token: extractToken(req),
   });
 });
 
@@ -1208,6 +1266,11 @@ app.use('/api/ai-tutor', aiTutorRouter);
 // Error handler (termasuk file attachment yang tidak ada)
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
+  // Body JSON tidak valid adalah kesalahan klien (400), bukan crash server (500).
+  if (err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ success: false, message: 'Body request bukan JSON yang valid.' });
+  }
+  console.error(`[ERROR] ${req.method} ${req.originalUrl} ->`, err && err.stack ? err.stack : err);
   if (req.path.startsWith('/api/')) {
     return res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server.' });
   }
@@ -1217,8 +1280,15 @@ app.use((err, req, res, next) => {
 /* ---------------------------------------------------------------
  * 8. Start Server
  * ------------------------------------------------------------- */
+async function bootstrapUsers() {
+  // Urutan penting: hydrate dari Redis dulu, baru pastikan akun Admin ada.
+  if (isUpstashEnabled) await syncUsersFromRedis();
+  ensureAdmin();
+}
+
 initServerIp()
-  .then(() => {
+  .then(async () => {
+    await bootstrapUsers();
     app.listen(PORT, () => {
       console.log('==================================================');
       console.log('  IT CLUB // LOCAL CTF ARENA');
@@ -1231,8 +1301,9 @@ initServerIp()
       console.log('==================================================');
     });
   })
-  .catch((err) => {
+  .catch(async (err) => {
     console.error('[START] Gagal inisialisasi IP, memakai 127.0.0.1 ->', err.message);
+    try { await bootstrapUsers(); } catch (e) { /* tetap lanjut */ }
     app.listen(PORT, () => {
       console.log(`IT CLUB // LOCAL CTF ARENA berjalan di http://localhost:${PORT} (IP fallback)`);
     });

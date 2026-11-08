@@ -60,6 +60,7 @@ web ctf/
 | POST   | `/api/login`       | Body `{ username, password }` → balasan berisi `token` sesi (HMAC) + `user`. |
 | GET    | `/api/challenges`  | Daftar soal **tanpa field flag**. Tiap item memuat `downloadUrls[]`, `externalUrl`, dan `solved`. `<SERVER_IP>` di deskripsi otomatis diganti IP aktif. Query opsional `?token=<sesi>` menandai soal yang sudah diselesaikan user tersebut. |
 | POST   | `/api/submit`      | Body `{ token, challengeId, flag }` — **wajib login** (401 `authRequired` bila tanpa token). Validasi flag, cegah submit ganda, tambah skor. Rate limit 30 request/menit per IP + cooldown 500 ms per user. |
+| GET/POST | `/api/session`   | Cek validitas token tanpa mengubah state. Balasan `{ valid, user? }`; 401 + `authReason` bila token rusak. Dipakai frontend agar sesi lama tidak baru terdeteksi saat submit flag. |
 | GET    | `/api/leaderboard` | Ranking peserta terdaftar berdasarkan total poin (descending). Rate limit 300 request/menit per IP. |
 | GET    | `/api/health`      | Status server + `serverIp` + `port` + jumlah user. |
 

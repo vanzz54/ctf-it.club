@@ -581,9 +581,14 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
     }
 
     async function api(path, options = {}) {
-      const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
+      const res = await fetch(path, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+        ...options,
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      });
       const data = await res.json().catch(() => ({ success: false, message: 'Respons server tidak valid.' }));
-      return { ok: res.ok, data };
+      return { ok: res.ok, status: res.status, data };
     }
 
     function toast(message, type = 'info') {
@@ -819,6 +824,28 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
 
     $('#logout-btn').addEventListener('click', () => logout(true));
 
+    /**
+     * Cek token ke server tanpa menghapus sesi lokal.
+     * Return:
+     *   { valid: true, user }
+     *   { valid: false, expired: true, reason }  -> token memang tidak valid
+     *   { valid: null, transient: true }          -> jaringan/5xx/rate-limit
+     */
+    async function verifySession() {
+      if (!state.token) return { valid: false, expired: true, reason: 'missing' };
+      try {
+        const { ok, status, data } = await api('/api/session', {
+          method: 'POST',
+          body: JSON.stringify({ token: state.token }),
+        });
+        if (ok && data.valid && data.user) return { valid: true, user: data.user };
+        if (status === 401) return { valid: false, expired: true, reason: data.authReason };
+        return { valid: null, transient: true };
+      } catch (e) {
+        return { valid: null, transient: true };
+      }
+    }
+
     /* ---------------------------------------------------------
      * Panduan collapsible
      * ------------------------------------------------------- */
@@ -1038,8 +1065,21 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
         });
 
         if (data.authRequired) {
-          toast(data.message || 'Silakan login terlebih dahulu untuk mengirimkan flag!', 'error');
-          await logout(false);
+          // JANGAN langsung logout() hanya karena satu respons 401.
+          // Verifikasi dulu: bisa jadi token memang rusak, atau server
+          // sedang gagal sementara (Redis/rate-limit/5xx). Menghapus sesi
+          // pada kasus kedua adalah penyebab "logout otomatis saat submit".
+          const check = await verifySession();
+          if (check.valid === false) {
+            toast('Sesi login tidak valid atau sudah kedaluwarsa. Silakan login ulang.', 'error');
+            await logout(false);
+          } else {
+            toast(data.message || 'Sesi belum bisa diverifikasi. Coba submit lagi.', 'error');
+            if (!state.token) openAuthModal('login');
+            button.classList.remove('btn-submit-loading');
+            button.disabled = false;
+            button.innerHTML = originalText || 'Submit Flag';
+          }
           return;
         }
 
@@ -1193,6 +1233,26 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
     loadSession();
     applySessionUI();
     if (!state.token) openAuthModal('login'); // auto-show saat first load
+
+    // Validasi sesi lama SEKALI saat halaman dibuka. Dengan begitu peserta
+    // tidak baru mengetahui tokennya sudah mati ketika menekan Submit Flag.
+    if (state.token) {
+      verifySession().then(async (check) => {
+        if (check.valid === true) {
+          state.name = check.user.name || state.name;
+          state.role = check.user.role || state.role;
+          saveSession();
+          applySessionUI();
+          if (typeof check.user.score === 'number') setScore(check.user.score);
+        } else if (check.valid === false) {
+          toast('Sesi login lama tidak valid. Silakan login ulang.', 'error');
+          await logout(false);
+        }
+        // check.transient === true -> server/jaringan sementara bermasalah:
+        // sesi lokal sengaja TIDAK dihapus agar peserta tidak ter-logout.
+      });
+    }
+
     progress(true);
     Promise.all([loadChallenges(), loadLeaderboard()]).finally(() => progress(false));
 
