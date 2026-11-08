@@ -581,11 +581,18 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
     }
 
     async function api(path, options = {}) {
+      // Kirim token lewat header standar juga (bukan hanya body), sehingga
+      // backend/proxy yang hanya membaca Authorization tetap mengenali sesi.
+      const authHeaders = state.token ? { Authorization: 'Bearer ' + state.token } : {};
       const res = await fetch(path, {
         cache: 'no-store',
         credentials: 'same-origin',
         ...options,
-        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+          ...(options.headers || {}),
+        },
       });
       const data = await res.json().catch(() => ({ success: false, message: 'Respons server tidak valid.' }));
       return { ok: res.ok, status: res.status, data };
@@ -838,7 +845,14 @@ const LS_AI_CHAT = 'ctf_ai_chat_state';
           method: 'POST',
           body: JSON.stringify({ token: state.token }),
         });
-        if (ok && data.valid && data.user) return { valid: true, user: data.user };
+        if (ok && data.valid && data.user) {
+          // Token bisa diperpanjang server (sliding session) — simpan yang baru.
+          if (data.token && data.token !== state.token) {
+            state.token = data.token;
+            saveSession();
+          }
+          return { valid: true, user: data.user };
+        }
         if (status === 401) return { valid: false, expired: true, reason: data.authReason };
         return { valid: null, transient: true };
       } catch (e) {

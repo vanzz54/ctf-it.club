@@ -218,6 +218,10 @@ if (!SESSION_SECRET) {
   }
 }
 
+/* Masa berlaku token sesi (sliding). Bisa diatur lewat env SESSION_TTL_HOURS.
+ * Default 7 hari — cukup panjang untuk kompetisi, tapi tetap punya expiry. */
+const TOKEN_TTL_MS = Math.max(1, Number(process.env.SESSION_TTL_HOURS) || 24 * 7) * 60 * 60 * 1000;
+
 /* --- Upstash Redis Cloud Integration (untuk Vercel Serverless Sync) --- */
 const UPSTASH_URL = (process.env.UPSTASH_REDIS_REST_URL || '').trim().replace(/\/$/, '');
 const UPSTASH_TOKEN = (process.env.UPSTASH_REDIS_REST_TOKEN || '').trim();
@@ -401,10 +405,14 @@ const hashPassword = (pw, salt) => crypto.scryptSync(String(pw), salt, 32).toStr
  * berujung pada token peserta menjadi tidak valid (auto-logout saat submit).
  * Pemanggilan dipindah ke bootstrapUsers() saat server start. */
 
-function signToken(key, salt) {
-  return crypto.createHmac('sha256', SESSION_SECRET).update(`${key}|${salt}`).digest('hex');
+function signToken(key, salt, exp) {
+  const payload = exp ? `${key}|${salt}|${exp}` : `${key}|${salt}`;
+  return crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('hex');
 }
-const makeToken = (key, salt) => `${key}.${signToken(key, salt)}`;
+const makeToken = (key, salt) => {
+  const exp = Date.now() + TOKEN_TTL_MS;
+  return `${key}.${exp}.${signToken(key, salt, exp)}`;
+};
 
 const safeEqualHex = (a, b) => {
   if (a.length !== b.length) return false;
@@ -438,27 +446,86 @@ function extractToken(req) {
 
 /**
  * Validasi token dan kembalikan alasan kegagalannya.
- * reason: 'missing' | 'malformed' | 'unknown_user' | 'bad_signature' | null
+ * Format baru : <key>.<exp>.<hmac>   (punya masa berlaku)
+ * Format lama : <key>.<hmac>         (tetap diterima agar sesi lama tidak putus)
+ * reason: 'missing' | 'malformed' | 'unknown_user' | 'bad_signature' | 'expired' | null
  */
 function authInfo(req) {
   const token = extractToken(req);
-  if (!token) return { user: null, reason: 'missing' };
-  const dot = token.indexOf('.');
-  if (dot < 1) return { user: null, reason: 'malformed' };
-  const key = token.slice(0, dot).toLowerCase();
-  const sig = token.slice(dot + 1);
-  if (!sig) return { user: null, reason: 'malformed' };
-  const user = users.get(key);
-  if (!user || !user.salt) return { user: null, reason: 'unknown_user' };
-  if (!safeEqualHex(sig, signToken(key, user.salt))) {
-    return { user: null, reason: 'bad_signature' };
+  if (!token) return { user: null, key: null, reason: 'missing' };
+
+  const parts = token.split('.');
+  let key = '';
+  let sig = '';
+  let exp = 0;
+
+  if (parts.length === 3) {
+    key = parts[0].toLowerCase();
+    exp = Number(parts[1]);
+    sig = parts[2];
+    if (!key || !sig || !Number.isFinite(exp) || exp <= 0) {
+      return { user: null, key: null, reason: 'malformed' };
+    }
+    if (Date.now() > exp) {
+      return { user: null, key, reason: 'expired', expired: true };
+    }
+  } else if (parts.length === 2) {
+    key = parts[0].toLowerCase();
+    sig = parts[1];
+    if (!key || !sig) return { user: null, key: null, reason: 'malformed' };
+  } else {
+    return { user: null, key: null, reason: 'malformed' };
   }
-  return { user, reason: null };
+
+  const user = users.get(key);
+  if (!user || !user.salt) return { user: null, key, reason: 'unknown_user' };
+
+  const expected = exp ? signToken(key, user.salt, exp) : signToken(key, user.salt);
+  if (!safeEqualHex(sig, expected)) {
+    return { user: null, key, reason: 'bad_signature' };
+  }
+  return { user, key, reason: null, exp };
 }
 
 /** Ambil user dari token (body.token / Authorization: Bearer / ?token=). */
 function authFrom(req) {
   return authInfo(req).user;
+}
+
+/**
+ * Middleware autentikasi untuk route yang WAJIB login.
+ * Membaca token dari Authorization: Bearer, body.token, atau ?token=.
+ * Menempelkan req.player + req.auth agar handler tidak parse ulang.
+ */
+function requireAuth(req, res, next) {
+  const auth = authInfo(req);
+  if (!auth.user) {
+    const expired = ['malformed', 'bad_signature', 'unknown_user', 'expired'].includes(auth.reason);
+    return res.status(401).json({
+      success: false,
+      authRequired: true,
+      sessionExpired: expired,
+      authReason: auth.reason,
+      message: auth.reason === 'expired'
+        ? 'Sesi akun sudah kedaluwarsa. Silakan login ulang.'
+        : expired
+          ? 'Sesi login tidak valid. Silakan login ulang.'
+          : 'Token sesi tidak dikirim. Silakan login terlebih dahulu.',
+    });
+  }
+  req.auth = auth;
+  req.player = auth.user;
+  next();
+}
+
+/** Middleware: hydrate user dari Redis sebelum validasi token (bila aktif). */
+async function syncUsersMiddleware(req, res, next) {
+  try {
+    if (isUpstashEnabled) await syncUsersFromRedis();
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 /* ---------------------------------------------------------------
@@ -661,25 +728,9 @@ app.post('/api/login', async (req, res) => {
  * 5c. API: POST /api/submit
  *    Body: { token, challengeId, flag } â€” WAJIB login (token sesi).
  * ------------------------------------------------------------- */
-app.post('/api/submit', async (req, res) => {
-  if (isUpstashEnabled) await syncUsersFromRedis();
+app.post('/api/submit', syncUsersMiddleware, requireAuth, async (req, res) => {
   const body = req.body || {};
-  const auth = authInfo(req);
-  if (!auth.user) {
-    // Bedakan token yang benar-benar rusak/kedaluwarsa dari masalah sementara.
-    // Frontend hanya boleh menghapus sesi bila sessionExpired === true.
-    const expired = auth.reason === 'malformed' || auth.reason === 'bad_signature' || auth.reason === 'unknown_user';
-    return res.status(401).json({
-      success: false,
-      authRequired: true,
-      sessionExpired: expired,
-      authReason: auth.reason,
-      message: expired
-        ? 'Sesi login tidak valid atau sudah kedaluwarsa. Silakan login ulang.'
-        : 'Token sesi tidak dikirim. Silakan login terlebih dahulu untuk mengirimkan flag!',
-    });
-  }
-  const player = auth.user;
+  const player = req.player;
 
   const challengeId = typeof body.challengeId === 'string' ? body.challengeId.trim() : '';
   const flag = typeof body.flag === 'string' ? body.flag.trim() : '';
@@ -792,22 +843,23 @@ app.post('/api/submit', async (req, res) => {
  *    Cek validitas token tanpa mengubah state apa pun. Dipakai
  *    frontend saat load & sebelum menghapus sesi lokal.
  * ------------------------------------------------------------- */
-app.all('/api/session', async (req, res) => {
-  if (isUpstashEnabled) await syncUsersFromRedis();
+app.all('/api/session', syncUsersMiddleware, async (req, res) => {
   const auth = authInfo(req);
   if (!auth.user) {
     return res.status(401).json({
       success: false,
       valid: false,
       authReason: auth.reason,
-      sessionExpired: auth.reason === 'malformed' || auth.reason === 'bad_signature' || auth.reason === 'unknown_user',
+      sessionExpired: ['malformed', 'bad_signature', 'unknown_user', 'expired'].includes(auth.reason),
     });
   }
   return res.json({
     success: true,
     valid: true,
     user: pubUser(auth.user),
-    token: extractToken(req),
+    // Sliding session: perpanjang token setiap kali dicek, sehingga peserta
+    // yang aktif tidak tiba-tiba kehilangan sesi di tengah kompetisi.
+    token: makeToken(auth.key, auth.user.salt),
   });
 });
 
