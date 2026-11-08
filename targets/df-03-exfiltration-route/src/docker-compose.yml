@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  nc-validator:
+    build: .
+    container_name: lks_pcap_validator
+    ports:
+      - "10003:10003"
+    restart: always
+    # Batasi memori agar jika banyak yang konek server tidak crash
+    deploy:
+      resources:
+        limits:
+          memory: 128M

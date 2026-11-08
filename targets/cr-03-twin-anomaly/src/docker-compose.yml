@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  twin_anomaly:
+    build: .
+    container_name: twin_anomaly_chall
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+    # Membatasi resource agar server tidak down jika ada peserta yang melakukan bruteforce/spam
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M

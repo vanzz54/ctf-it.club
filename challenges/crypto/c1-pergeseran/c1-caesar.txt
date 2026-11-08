@@ -1,0 +1,12 @@
+
+================================================================
+    SISTEM ENKRIPSI KAIZAR - LATIHAN CRIPTOGRAFI
+================================================================
+Pesan ini adalah contoh terenkripsi menggunakan Caesar cipher.
+Kunci shift = 13 (ROT13).
+Tujuan: Dekrip pesan ini untuk mendapatkan path-flag.
+Pesan Terenkripsi: Uryyb Jbeyq, V'z nfr! Guvf vf zrffrmvat
+ovt erdhnegvba va n cebzhzrag, jurer lbh pna or qbar va vg.
+Petunjuk: Gunakan shift 13 ke belakang.
+Jawaban: ITCLUB{...}
+================================================================

@@ -1,0 +1,24 @@
+
+================================================================
+    DORK DAFTAR - FORUM KOMUNITAS IT KABUPATEN
+================================================================
+[BULAN 3, 2026]
+--- TOPIK 1: Tugas Akhir ---
+User: @radhya123
+Postingan: "Halo semua, siap ngerjain tugas akhir bagaimana? Aku lagi
+cari referensi basis data mahasiswa. Ada yang punya source code?"
+--- TOPIK 2: Backup Server ---
+User: @admin_it
+Postingan: "Warga, jangan lupa backup server sebelum disk penuh.
+Ngomong2 soal deployment, mau ke server production? Aku dulu buat
+dokumentasi di /tmp/deploy_note.txt kalau ada yang butuh."
+--- TOPIK 3: Oss - Security ---
+User: @aura_dev
+Postingan: "Nih, sempat coba Google dorks buat cari file .env yang
+bocor. Biasanya orang lupa .gitignore. Cth: site:github.com
+database_url filetype:env -api.github.com"
+--- TOPIK 4: Event Lain ---
+User: @radhya123
+Postingan: "Aku daftar event inverter ke depannya, minat banget
+dengan kateringannya. Sampai-sampai tidur malam di lab IT karena
+diskusi publikasi."

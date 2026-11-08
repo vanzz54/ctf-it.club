@@ -1,0 +1,354 @@
+[
+  {
+    "id": "web-03",
+    "title": "CyberNusa Official Landing Page",
+    "category": "Web Exploitation",
+    "points": 500,
+    "difficulty": "Easy",
+    "description": "Tim CyberNusa baru saja meluncurkan halaman Landing Page resmi perusahaan mereka, dibangun dengan framework Next.js yang modern. Mereka sangat bangga dengan performa situsnya, terutama kecepatan memuat gambar yang sangat kilat.\n\nNamun, seorang peneliti keamanan telah memperingatkan bahwa fitur optimasi gambar bisa berbalik buruk jika dikonfigurasi sembarangan.\n\nTersembunyi di dalam source code aplikasi terdapat sebuah API route internal di /api/internal/flag yang hanya khusus untuk admin. API ini membuat sebuah gambar yang mengandung flag.\n\nBisakah kamu mengambil gambar flag tersebut dengan mengeksploitasi sebuah kerentanan di halaman Landing Page ini?\n\n---\nTarget : http://<SERVER_IP>:6060\nFormat : ITCLUB{...}",
+    "flag": "ITCLUB{N3xtJ5_1m4g3_0pt1m1z4t10n_55RF_M4st3r}",
+    "file": "web-03-cybernusa-landing_dist.zip"
+  },
+  {
+    "id": "web-04",
+    "title": "CyberNusa Portal",
+    "category": "Web Exploitation",
+    "points": 998,
+    "difficulty": "Hard",
+    "description": "Selamat bergabung di CyberNusa!\n\nUntuk proses onboarding, silakan daftar dan lengkapi profilmu di jaringan internal karyawan. Kami bangga menjaga data kami tetap sangat rahasia. Kami menjamin hanya Admin yang memiliki akses ke catatan penting perusahaan — pengguna biasa bahkan tidak bisa melihat dasbor pencarian karyawan.\n\nTUJUAN: Bobol Admin Panel dan ambil flag rahasia dari database.\n\n---\nTarget : http://<SERVER_IP>:3000\nFormat : ITCLUB{...}\nCatatan: soal ini berjalan sebagai server, tidak ada file lampiran.",
+    "flag": "ITCLUB{m4ss_4ss1gnm3nt_t0_un10n_sqli_p0ng0}"
+  },
+  {
+    "id": "web-05",
+    "title": "CyberNusa Swag Store",
+    "category": "Web Exploitation",
+    "points": 980,
+    "difficulty": "Hard",
+    "description": "Selamat datang di tim CyberNusa!\nSebagai karyawan baru, kamu diberi saldo awal $1.500 untuk dibelanjakan di CyberNusa Swag Store. Kami menyediakan berbagai merchandise resmi perusahaan, mulai dari stiker dan t-shirt hingga laptop.\n\nNamun, tujuanmu sebenarnya bukan sekadar membeli merchandise biasa. Kamu harus mendapatkan benda legendaris Premium Flag yang harganya fantastis $100.000!\n\nKabar baiknya, sistem inventaris kami menyertakan fitur Refund (jual kembali). Bisakah kamu memakai insting hackermu, melipatgandakan dana, dan mengambil flag itu?\n\n---\nTarget : http://<SERVER_IP>:4000\nFormat : ITCLUB{...}",
+    "flag": "ITCLUB{r4c3_c0nd1t10n_m4k3s_y0u_r1ch_c7b3rnu5a}",
+    "file": "web-05-cybernusa-swag_dist.zip"
+  },
+  {
+    "id": "web-06",
+    "title": "MerchTech Custom Studio",
+    "category": "Web Exploitation",
+    "points": 980,
+    "difficulty": "Hard",
+    "description": "Selamat datang di MerchTech Custom Studio!\n\nMerchTech adalah toko online andalanmu untuk membeli segala jenis merchandise anime. Para developer bersumpah situsnya benar-benar aman. Mereka bahkan memasang Web Application Firewall (WAF) untuk menyaring lalu lintas sebelum mencapai server.\n\nTapi benarkah begitu?\n\n---\nTarget : http://<SERVER_IP>:5000\nFormat : ITCLUB{...}",
+    "flag": "ITCLUB{sst1_j1nj4_byp4ss_m4st3r_w1buw3ar_6621}",
+    "file": "web-06-merchtech_dist.zip"
+  },
+  {
+    "id": "pwn-01",
+    "title": "Admin Panel",
+    "category": "Binary Exploitation",
+    "points": 980,
+    "difficulty": "Hard",
+    "description": "Kami menemukan sebuah panel login usang yang dipakai oleh administrator sistem. tampaknya sang programmer mengabaikan peringatan keamanan compiler ketika memakai fungsi legacy untuk membaca input password.\n\nBisakah kamu memaksa program ini memanggil fungsi backup yang tersembunyi?\n\n---\nConnect : nc <SERVER_IP> 9001\nFormat  : ITCLUB{...}",
+    "flag": "ITCLUB{b4s1c_b0f_r3t2w1n_m4st3r_2026}",
+    "file": "pwn-01-admin-panel_chall"
+  },
+  {
+    "id": "pwn-02",
+    "title": "Feedback Portal",
+    "category": "Binary Exploitation",
+    "points": 992,
+    "difficulty": "Hard",
+    "description": "Portal layanan pelanggan ini dibangun untuk menerima masukan dan keluhan. Namun, ada cacat fatal ketika program menampilkan input mentah pengguna langsung ke layar.\n\nTugasmu adalah menaikkan level aksesmu (menjadi admin) dengan memodifikasi memori program. Kami bahkan sudah baik hati membocorkan alamat memori variabelnya untukmu!\n\n---\nConnect : nc <SERVER_IP> 9002\nFormat  : ITCLUB{...}",
+    "flag": "ITCLUB{f0rm4t_str1ng_4rb1tr4ry_wr1t3_2026}",
+    "file": "pwn-02-feedback-portal_chall"
+  },
+  {
+    "id": "pwn-03",
+    "title": "Weapon Shop",
+    "category": "Binary Exploitation",
+    "points": 565,
+    "difficulty": "Easy",
+    "description": "Selamat datang di toko senjata! Kamu hanya diberi modal awal 10 Gold, sementara \"The Legendary Flag\" dihargai 1000 Gold. Mustahil membelinya secara normal.\n\nNamun, beredar kabar bahwa kalkulator kasir di toko ini memakai mesin aritmetika 32-bit lawas yang bisa \"overflow\" dan jadi kacau jika diminta menghitung angka raksasa...\n\nBelanja dengan cerdas!\n\n---\nConnect : nc <SERVER_IP> 9003\nFormat  : ITCLUB{...}",
+    "flag": "ITCLUB{1nt3g3r_0v3rfl0w_m4th_m4g1c_2026}",
+    "file": "pwn-03-weapon-shop_chall"
+  },
+  {
+    "id": "df-01",
+    "title": "Get Tracked",
+    "category": "Digital Forensics",
+    "points": 998,
+    "difficulty": "Hard",
+    "description": "Sistem pemantauan kami mendeteksi akses tidak sah ke salah satu server Linux kritis kami. Penyerang berhasil menyelinap tanpa terdeteksi dan memasang backdoor untuk mempertahankan aksesnya.\n\nMereka berusaha menghapus jejak sebelum memutus koneksi, tapi tidak ada penyusup yang benar-benar tak terlihat. Beruntung, tim tanggap insiden kami berhasil mengambil forensic image dari mesin yang terinfeksi sebelum mematikannya.\n\nTugasmu sebagai investigator forensik digital adalah menganalisis citra disk terkompresi yang disediakan, merekonstruksi jalur eksekusi penyerang, dan mengungkap identitas aslinya. Sambungkan ke terminal tanggap insiden interaktif kami untuk melaporkan temuanmu dan mengamankan flag.\n\n---\nConnect : nc <SERVER_IP> 10001\nFormat  : ITCLUB{...}",
+    "flag": "ITCLUB{S1l3nt_4cc3ss_4nd_Pr1vEsc_M4st3r}",
+    "file": "df-01-get-tracked_server_evidence.rar"
+  },
+  {
+    "id": "df-02",
+    "title": "Silent Cipher",
+    "category": "Digital Forensics",
+    "points": 998,
+    "difficulty": "Hard",
+    "description": "Sebuah server Linux kritis telah menjadi korban serangan ransomware canggih yang mengunci penuh datanya dan membobol sistemnya. Para penyerang meninggalkan jejak artefak digital, tapi alat dan metode pastinya masih misteri.\n\nSebagai investigator forensik digital, kamu harus menganalisis citra disk yang disediakan untuk mengungkap peristiwa ini. Kenali teknik yang dipakai penyerang, temukan cara kerja payload berbahaya tersebut, dan rekonstruksi urutan kejadian persis menuju jatuhnya sistem.\n\nSambungkan ke terminal tanggap insiden interaktif untuk melaporkan temuanmu dan mengamankan flag.\n\n---\nConnect : nc <SERVER_IP> 10002\nFormat  : ITCLUB{...}",
+    "flag": "ITCLUB{R4ns0mw4r3_D3c0d3d_4nd_Tr4ck3d}",
+    "file": "df-02-silent-cipher_server_evidence.rar"
+  },
+  {
+    "id": "df-03",
+    "title": "The Exfiltration Route",
+    "category": "Digital Forensics",
+    "points": 732,
+    "difficulty": "Medium",
+    "description": "Selain menyita citra disk dari server yang terinfeksi ransomware, tim SOC CyberNusa juga berhasil menyadap dan mengambil rekaman lalu lintas jaringan sesaat sebelum malware dijalankan.\n\nBerdasarkan analisis awal, penyerang melakukan beberapa aktivitas lewat jaringan:\n1. Mengunduh payload tambahan.\n2. Mengeksfiltrasi (mencuri) database perusahaan.\n3. Berkomunikasi dengan Server C2 memakai teknik Tunneling yang berisik tapi tetap tersembunyi.\n\nUnduh file PCAP-nya dan bedah trafiknya. Kumpulkan bukti dari protokol HTTP, FTP, dan DNS. Penyerang menghancurkan pesan rahasia terakhirnya menjadi kepingan-kepingan yang beterbangan di udara.\n\nSetelah semua temuan terkumpul, laporkan hasil penyelidikanmu ke Portal Validasi Insiden CyberNusa lewat koneksi Netcat di bawah untuk mendapatkan Flag.\n\n---\nConnect : nc <SERVER_IP> 10003\nFormat  : ITCLUB{...}",
+    "flag": "ITCLUB{DNS_Tunn3l1ng_1s_N01sy_But_D34dly_998}",
+    "file": "df-03-exfiltration-route_traffic.pcap"
+  },
+  {
+    "id": "df-04",
+    "title": "The Missing Phantom",
+    "category": "Digital Forensics",
+    "points": 965,
+    "difficulty": "Hard",
+    "description": "[LAPORAN INSIDEN - SOC CYBERNUSA]\nTim SOC CyberNusa mendeteksi sebuah anomali di source code inti perusahaan. Folder yang terdampak telah berhasil diisolasi dan diamankan untuk penyelidikan.\n\nAnalisis bukti digital yang disediakan.\n\n---\nFormat : ITCLUB{...}\nPetunjuk: bongkar arsip, lalu telusuri jejak yang tertinggal di dalamnya (ada bagian yang dihapus tapi belum benar-benar hilang).",
+    "flag": "ITCLUB{G1t_F0r3ns1cs_1s_N0t_Just_R3fl0g_8892}",
+    "file": "df-04-missing-phantom_phantom_repo.zip"
+  },
+  {
+    "id": "cr-03",
+    "title": "The Twin Anomaly",
+    "category": "Cryptography",
+    "points": 992,
+    "difficulty": "Hard",
+    "description": "Sistem validasi integritas file kami digadang-gadang sangat aman karena mengandalkan algoritma hashing yang pernah menjadi standar emas industri. Untuk mencegah duplikasi, sistem ini dengan ketat menolak file kembar apa pun.\n\nKamu perlu membuktikan bahwa algoritma hashing yang dipakai punya kecacatan matematis mendasar.\nBisakah kamu menipu sistem validasi kami dengan memberikan dua input yang sepenuhnya berbeda tapi diakui server sebagai \"kembar\" yang identik?\n\n---\nConnect : nc <SERVER_IP> 1337\nFormat  : ITCLUB{...}\nLampiran: source code validator (Python).",
+    "flag": "ITCLUB{MD5_C0ll1s10n_1s_4lw4y5_F4t4l_9921}",
+    "file": "cr-03-twin-anomaly_validator.py"
+  },
+  {
+    "id": "cr-04",
+    "title": "Pesan Berantai",
+    "category": "Cryptography",
+    "points": 625,
+    "difficulty": "Medium",
+    "description": "Seorang Direktur IT ingin mengirim password darurat yang persis sama ke tiga server cabang perusahaannya.\n\nSetiap server cabang sudah punya konfigurasi RSA-nya sendiri (dengan nilai modulus n yang berbeda). Untuk mempercepat skrip otomatisasinya, sang Direktur mengonfigurasi proses enkripsi memakai Public Exponent kecil (e = 3) untuk semua pengiriman.\n\n\"Tiap server punya n berbeda, jadi ciphertext-nya pasti berbeda. Ini dijamin aman dari hacking!\" pikirnya.\n\nSayangnya, mengirim pesan yang persis sama ke banyak tujuan memakai RSA menyembunyikan kerentanan fatal jika padding yang benar tidak diterapkan.\n\n---\nFormat : ITCLUB{...}\nLampiran: encrypt.py + output.txt (ciphertext).",
+    "flag": "ITCLUB{H4st4d_Br04dc4st_4tt4ck_CR7_M4g1c_0099}",
+    "file": "cr-04-pesan-berantai_bundle.zip"
+  },
+  {
+    "id": "cr-05",
+    "title": "Pesan di Balik Sisa Bagi",
+    "category": "Cryptography",
+    "points": 965,
+    "difficulty": "Hard",
+    "description": "Algoritma ini tidak memakai metode enkripsi yang rumit, melainkan hanya mengandalkan operasi matematika dasar untuk mengacak data.\n\nPesan disembunyikan lewat manipulasi eksponen, lalu dikunci di dalam sisa pembagian (remainder). Jika kamu tahu operasi terbalik dari rumusnya, data itu bisa diambil kembali.\n\n---\nFormat : ITCLUB{...}\nLampiran: semuabos.py + output.txt (hasil enkripsi).",
+    "flag": "ITCLUB{4L1805_CRyp709R4phy_571LL_50_34Zy_R19H7??_71850}",
+    "file": "cr-05-sisa-bagi_bundle.zip"
+  },
+  {
+    "id": "rv-02",
+    "title": "LKS-Crypter",
+    "category": "Reverse Engineering",
+    "points": 965,
+    "difficulty": "Hard",
+    "description": "Tim tanggap insiden menerima laporan bahwa salah satu server Linux telah terinfeksi ransomware bernama \"LKS-Crypter\". Sebuah file sangat rahasia bernama secret_data.txt telah dienkripsi dan diganti namanya menjadi secret_data.txt.enc.\n\nSatu-satunya petunjuk yang tertinggal di server hanyalah berkas ransomware.elf.\n\n---\nFormat : ITCLUB{...}\nLampiran: ransomware.elf + secret_data.txt.enc",
+    "flag": "ITCLUB{r3v3rs1ng_3lf_m4lw4r3_1s_4c7u4lly_fun}",
+    "files": [
+      "rv-02-lks-crypter_ransomware.elf",
+      "rv-02-lks-crypter_secret_data.txt.enc"
+    ]
+  },
+  {
+    "id": "rv-03",
+    "title": "The Forgotten Vault",
+    "category": "Reverse Engineering",
+    "points": 945,
+    "difficulty": "Hard",
+    "description": "Seorang mantan administrator sistem di CyberNusa memakai aplikasi konsol lokal (vault.exe) untuk mengamankan brankas digital mereka. Aplikasi itu dibangun dengan bahasa pemrograman Python, tapi sayangnya source code aslinya hilang ketika server lama mereka mengalami crash.\n\nKini tim CyberNusa sangat membutuhkan akses ke brankas tersebut. Yang tersisa hanyalah berkas executable dari aplikasinya.\n\nBisakah kamu membantu tim CyberNusa melakukan reverse engineering aplikasi itu dan menemukan Access Key tersembunyi (yang juga merupakan flag) di dalamnya?\n\n---\nFormat : ITCLUB{...}\nLampiran: vault.exe (PyInstaller, ~9 MB).",
+    "flag": "ITCLUB{py1nst4ll3r_unp4ck1ng_1s_3asy}",
+    "file": "rv-03-forgotten-vault_vault.exe"
+  },
+  {
+    "id": "rv-04",
+    "title": "The Phishing App",
+    "category": "Reverse Engineering",
+    "points": 945,
+    "difficulty": "Hard",
+    "description": "Tim CyberNusa berhasil membongkar server sebuah sindikat peretas dan menyita seluruh source code aplikasi Web/Phishing yang sering dipakai untuk menjebak korbannya. Sayangnya, para peretas cukup cerdik sehingga meng-obfuscate beberapa routing rahasia (API) yang menyimpan data krusial.\n\nTugasmu adalah menelusuri seluruh source code aplikasi Express.js ini, mengungkap API rahasia yang sengaja disembunyikan, dan mengambil rahasia (flag) yang tersimpan di dalamnya.\n\n---\nFormat : ITCLUB{...}\nLampiran: the_phising_app.zip",
+    "flag": "ITCLUB{0bfusc4t3d_3xpr3ss_b4ckd00r}",
+    "file": "rv-04-phishing-app_dist.zip"
+  },
+  {
+    "id": "b2r-1-low",
+    "title": "Challenge 1: The Dev Portal [Low]",
+    "category": "Boot2Root",
+    "points": 500,
+    "difficulty": "Easy",
+    "description": "── LORE ──\nSistem ini awalnya dibangun sebagai Portal Akademik internal bagi mahasiswa untuk mengumpulkan tugas dan mengecek nilai mereka secara mandiri. Namun, karena tenggat waktu yang ketat, salah satu developer buru-buru melakukan deployment ke server produksi. Kabarnya, beberapa fitur vital dibiarkan tanpa keamanan dan tanpa pengujian.\n\n── MISI ──\nTugasmu adalah melakukan pengujian penetrasi menyeluruh terhadap portal ini. Mulai penilaianmu dari luar, lalu bobol pertahanan perimeter. Setelah masuk, telusuri sistemnya, eskalasi hak aksesmu, dan kompromikan mesin ini sepenuhnya. Ingat, kebiasaan buruk sering meninggalkan jejak, dan miskonfigurasi adalah sahabat terbaik penyerang.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH1_LOW}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-1-med",
+    "title": "Challenge 1: The Dev Portal [Medium]",
+    "category": "Boot2Root",
+    "points": 750,
+    "difficulty": "Medium",
+    "description": "── LORE ──\nSistem ini awalnya dibangun sebagai Portal Akademik internal bagi mahasiswa untuk mengumpulkan tugas dan mengecek nilai mereka secara mandiri. Namun, karena tenggat waktu yang ketat, salah satu developer buru-buru melakukan deployment ke server produksi. Kabarnya, beberapa fitur vital dibiarkan tanpa keamanan dan tanpa pengujian.\n\n── MISI ──\nTugasmu adalah melakukan pengujian penetrasi menyeluruh terhadap portal ini. Mulai penilaianmu dari luar, lalu bobol pertahanan perimeter. Setelah masuk, telusuri sistemnya, eskalasi hak aksesmu, dan kompromikan mesin ini sepenuhnya. Ingat, kebiasaan buruk sering meninggalkan jejak, dan miskonfigurasi adalah sahabat terbaik penyerang.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH1_MEDIUM}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-1-high",
+    "title": "Challenge 1: The Dev Portal [High]",
+    "category": "Boot2Root",
+    "points": 1000,
+    "difficulty": "Hard",
+    "description": "── LORE ──\nSistem ini awalnya dibangun sebagai Portal Akademik internal bagi mahasiswa untuk mengumpulkan tugas dan mengecek nilai mereka secara mandiri. Namun, karena tenggat waktu yang ketat, salah satu developer buru-buru melakukan deployment ke server produksi. Kabarnya, beberapa fitur vital dibiarkan tanpa keamanan dan tanpa pengujian.\n\n── MISI ──\nTugasmu adalah melakukan pengujian penetrasi menyeluruh terhadap portal ini. Mulai penilaianmu dari luar, lalu bobol pertahanan perimeter. Setelah masuk, telusuri sistemnya, eskalasi hak aksesmu, dan kompromikan mesin ini sepenuhnya. Ingat, kebiasaan buruk sering meninggalkan jejak, dan miskonfigurasi adalah sahabat terbaik penyerang.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH1_HIGH}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-2-low",
+    "title": "Challenge 2: Legacy Maintenance [Low]",
+    "category": "Boot2Root",
+    "points": 500,
+    "difficulty": "Easy",
+    "description": "── LORE ──\nSelama migrasi infrastruktur besar-besaran, tim IT Operations mematikan portal utama dan menyalakan sebuah server cadangan legacy hanya untuk menampilkan halaman \"Under Maintenance\". Menganggap ini solusi sementara, tim infrastruktur mengabaikan tumpukan advisory keamanan penting dan membiarkan layanan usang tetap berjalan di latar belakang.\n\n── MISI ──\nTugasmu adalah membuktikan bahwa membiarkan sistem legacy tanpa patch tetap daring adalah kesalahan fatal. Lakukan rekognisi menyeluruh untuk mengidentifikasi layanan usang yang berjalan di mesin ini. Bobol pertahanan luar, telusuri lingkungan internal, dan ungkap identitas operator sistem. Terakhir, manfaatkan miskonfigurasi internal untuk menaikkan hak aksesmu dan mengambil alih kendali penuh atas server.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH2_LOW}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-2-med",
+    "title": "Challenge 2: Legacy Maintenance [Medium]",
+    "category": "Boot2Root",
+    "points": 750,
+    "difficulty": "Medium",
+    "description": "── LORE ──\nSelama migrasi infrastruktur besar-besaran, tim IT Operations mematikan portal utama dan menyalakan sebuah server cadangan legacy hanya untuk menampilkan halaman \"Under Maintenance\". Menganggap ini solusi sementara, tim infrastruktur mengabaikan tumpukan advisory keamanan penting dan membiarkan layanan usang tetap berjalan di latar belakang.\n\n── MISI ──\nTugasmu adalah membuktikan bahwa membiarkan sistem legacy tanpa patch tetap daring adalah kesalahan fatal. Lakukan rekognisi menyeluruh untuk mengidentifikasi layanan usang yang berjalan di mesin ini. Bobol pertahanan luar, telusuri lingkungan internal, dan ungkap identitas operator sistem. Terakhir, manfaatkan miskonfigurasi internal untuk menaikkan hak aksesmu dan mengambil alih kendali penuh atas server.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH2_MEDIUM}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-2-high",
+    "title": "Challenge 2: Legacy Maintenance [High]",
+    "category": "Boot2Root",
+    "points": 1000,
+    "difficulty": "Hard",
+    "description": "── LORE ──\nSelama migrasi infrastruktur besar-besaran, tim IT Operations mematikan portal utama dan menyalakan sebuah server cadangan legacy hanya untuk menampilkan halaman \"Under Maintenance\". Menganggap ini solusi sementara, tim infrastruktur mengabaikan tumpukan advisory keamanan penting dan membiarkan layanan usang tetap berjalan di latar belakang.\n\n── MISI ──\nTugasmu adalah membuktikan bahwa membiarkan sistem legacy tanpa patch tetap daring adalah kesalahan fatal. Lakukan rekognisi menyeluruh untuk mengidentifikasi layanan usang yang berjalan di mesin ini. Bobol pertahanan luar, telusuri lingkungan internal, dan ungkap identitas operator sistem. Terakhir, manfaatkan miskonfigurasi internal untuk menaikkan hak aksesmu dan mengambil alih kendali penuh atas server.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH2_HIGH}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-3-low",
+    "title": "Challenge 3: Cloud Beta (The Forgotten Path) [Low]",
+    "category": "Boot2Root",
+    "points": 500,
+    "difficulty": "Easy",
+    "description": "── LORE ──\nSelamat datang di prototipe \"CloudStorage V1 Beta,\" sebuah layanan penyimpanan file terpusat untuk tim internal. Baru-baru ini, fitur unggah web utama tiba-tiba dinonaktifkan setelah ditemukan bug fatal. Sayangnya, tim engineering ceroboh dan lupa menutup jalur pemeliharaan alternatif mereka. Mereka membiarkan protokol transfer file legacy terbuka lebar demi mempermudah pemindahan data.\n\nKabarnya, mantan engineer tidak sengaja meninggalkan sebuah \"secret key\" di aset web sebelum mengundurkan diri. Lebih lanjut, sebuah memo bocor dari Tim Keamanan menunjukkan bahwa sistem operasi inti server sedang menderita kerentanan parah yang belum dipatch.\n\n── MISI ──\nWaktu tinggal sedikit sebelum Tim Keamanan menyadari dan menambal miskonfigurasi fatal ini. Tugasmu adalah membobol lingkungan beta ini sepenuhnya. Mulai dengan memakai jalur alternatif yang terlupa untuk menginspeksi sistem penyimpanan dan mendapatkan pijakan awalmu. Setelah di dalam, susuri lingkungan internal untuk menemukan kunci tersembunyi yang ditinggalkan mantan engineer demi menaikkan aksesmu. Terakhir, analisis arsitektur dasarnya dan eksploitasi kecacatan mendasar pada sistem inti untuk mengambil alih kendali penuh.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH3_LOW}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-3-med",
+    "title": "Challenge 3: Cloud Beta (The Forgotten Path) [Medium]",
+    "category": "Boot2Root",
+    "points": 750,
+    "difficulty": "Medium",
+    "description": "── LORE ──\nSelamat datang di prototipe \"CloudStorage V1 Beta,\" sebuah layanan penyimpanan file terpusat untuk tim internal. Baru-baru ini, fitur unggah web utama tiba-tiba dinonaktifkan setelah ditemukan bug fatal. Sayangnya, tim engineering ceroboh dan lupa menutup jalur pemeliharaan alternatif mereka. Mereka membiarkan protokol transfer file legacy terbuka lebar demi mempermudah pemindahan data.\n\nKabarnya, mantan engineer tidak sengaja meninggalkan sebuah \"secret key\" di aset web sebelum mengundurkan diri. Lebih lanjut, sebuah memo bocor dari Tim Keamanan menunjukkan bahwa sistem operasi inti server sedang menderita kerentanan parah yang belum dipatch.\n\n── MISI ──\nWaktu tinggal sedikit sebelum Tim Keamanan menyadari dan menambal miskonfigurasi fatal ini. Tugasmu adalah membobol lingkungan beta ini sepenuhnya. Mulai dengan memakai jalur alternatif yang terlupa untuk menginspeksi sistem penyimpanan dan mendapatkan pijakan awalmu. Setelah di dalam, susuri lingkungan internal untuk menemukan kunci tersembunyi yang ditinggalkan mantan engineer demi menaikkan aksesmu. Terakhir, analisis arsitektur dasarnya dan eksploitasi kecacatan mendasar pada sistem inti untuk mengambil alih kendali penuh.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH3_MEDIUM}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "b2r-3-high",
+    "title": "Challenge 3: Cloud Beta (The Forgotten Path) [High]",
+    "category": "Boot2Root",
+    "points": 1000,
+    "difficulty": "Hard",
+    "description": "── LORE ──\nSelamat datang di prototipe \"CloudStorage V1 Beta,\" sebuah layanan penyimpanan file terpusat untuk tim internal. Baru-baru ini, fitur unggah web utama tiba-tiba dinonaktifkan setelah ditemukan bug fatal. Sayangnya, tim engineering ceroboh dan lupa menutup jalur pemeliharaan alternatif mereka. Mereka membiarkan protokol transfer file legacy terbuka lebar demi mempermudah pemindahan data.\n\nKabarnya, mantan engineer tidak sengaja meninggalkan sebuah \"secret key\" di aset web sebelum mengundurkan diri. Lebih lanjut, sebuah memo bocor dari Tim Keamanan menunjukkan bahwa sistem operasi inti server sedang menderita kerentanan parah yang belum dipatch.\n\n── MISI ──\nWaktu tinggal sedikit sebelum Tim Keamanan menyadari dan menambal miskonfigurasi fatal ini. Tugasmu adalah membobol lingkungan beta ini sepenuhnya. Mulai dengan memakai jalur alternatif yang terlupa untuk menginspeksi sistem penyimpanan dan mendapatkan pijakan awalmu. Setelah di dalam, susuri lingkungan internal untuk menemukan kunci tersembunyi yang ditinggalkan mantan engineer demi menaikkan aksesmu. Terakhir, analisis arsitektur dasarnya dan eksploitasi kecacatan mendasar pada sistem inti untuk mengambil alih kendali penuh.\n\n---\nFormat Flag : ITCLUB{...}\nPassword zip: S4y@s14pLKS!!\nLampiran    : OVA (VMWare Workstation) — klik tombol LINK OVA.\nCatatan     : flag masih PLACEHOLDER, ganti di data/challenges.json setelah kamu ambil dari VM.",
+    "flag": "ITCLUB{GANTI_FLAG_CH3_HIGH}",
+    "url": "https://drive.google.com/drive/folders/1d8IhKWia0A1uoQGiW6HdDeOj54XlJTNl?usp=drive_link"
+  },
+  {
+    "id": "web-01",
+    "title": "Welcome Aboard",
+    "category": "Web",
+    "points": 50,
+    "difficulty": "Easy",
+    "description": "Server ini menyimpan terlalu banyak informasi di tempat yang salah. Buka source code halaman (Ctrl+U), lalu telusuri komentar tersembunyi untuk menemukan flag pertamamu.",
+    "flag": "ITCLUB{h3ll0_w0rld_fr0m_c0mm3nts}",
+    "file": "web-01-source.html"
+  },
+  {
+    "id": "web-02",
+    "title": "Robo.txt",
+    "category": "Web",
+    "points": 80,
+    "difficulty": "Easy",
+    "description": "Mesin pencari boleh membaca file ini, tapi kamu? Unduh lampiran, lalu temukan jalur rahasia yang sengaja disembunyikan dari manusia.",
+    "flag": "ITCLUB{r0b0ts_d0_n0t_e4t_hum4ns}",
+    "file": "web-02-robots.zip"
+  },
+  {
+    "id": "cr-01",
+    "title": "Caesar Never Sleeps",
+    "category": "Crypto",
+    "points": 100,
+    "difficulty": "Easy",
+    "description": "Pesan ini pernah dilindungi Kaisar Romawi. Putar kembali setiap huruf sejauh yang dibutuhkan Caesar dua ribu tahun lalu. Kunci desainnya: 13.",
+    "flag": "ITCLUB{r0t13_m4k3s_th3_w0rld_g0_r0und}",
+    "file": "cr-01-caesar.txt"
+  },
+  {
+    "id": "cr-02",
+    "title": "Broken Hash",
+    "category": "Crypto",
+    "points": 150,
+    "difficulty": "Medium",
+    "description": "Seorang admin menyimpan hash MD5 dari password lamanya. Karena malas, dia memakai password yang sangat umum. Gunakan lampiran berisi daftar kandidat, cocokkan hash-nya, lalu bungkus kata sandi itu dalam format flag: ITCLUB{password_anda}.",
+    "flag": "ITCLUB{hunter2}",
+    "file": "cr-02-hashes.zip"
+  },
+  {
+    "id": "fr-01",
+    "title": "Ghost In The Picture",
+    "category": "Forensics",
+    "points": 120,
+    "difficulty": "Medium",
+    "description": "File PNG ini terlihat biasa saja, tapi tidak semua byte di dalamnya ikut tampil di layar. Seseorang menyelipkan pesan di antara piksel-piksel itu.",
+    "flag": "ITCLUB{h1dd3n_1n_th3_p1x3ls}",
+    "file": "fr-01-pixel.png"
+  },
+  {
+    "id": "fr-02",
+    "title": "The Lost Chat Log",
+    "category": "Forensics",
+    "points": 180,
+    "difficulty": "Medium",
+    "description": "Ada seseorang yang mengobrol lalu menghapus percakapannya. Untungnya file teksnya masih tersisa di lampiran. Cari kalimat yang menyimpan flag.",
+    "flag": "ITCLUB{d3l3t3d_n3v3r_g0n3}",
+    "file": "fr-02-chatlog.txt"
+  },
+  {
+    "id": "rv-01",
+    "title": "Strings Attached",
+    "category": "Reverse",
+    "points": 200,
+    "difficulty": "Medium",
+    "description": "Berkas biner ini menjaga sebuah string dengan ketat. Kamu tidak perlu mengeksekusinya, cukup panggil 'strings' (atau rabin2) untuk memancing keluar semua string yang terkandung di dalamnya.",
+    "flag": "ITCLUB{1_am_n0t_4_s3cr3t_4nym0re}",
+    "file": "rv-01-secret.bin"
+  },
+  {
+    "id": "ms-01",
+    "title": "Binary Whisper",
+    "category": "Misc",
+    "points": 60,
+    "difficulty": "Easy",
+    "description": "Lampiran berisi deretan angka 0 dan 1 yang tertata rapi dalam baris 8 bit. Ubah setiap byte menjadi karakter ASCII dan susun menjadi kalimat flag.",
+    "flag": "ITCLUB{01010000_11110000}",
+    "file": "ms-01-binary.txt"
+  },
+  {
+    "id": "ms-02",
+    "title": "Nothing To See Here",
+    "category": "Misc",
+    "points": 90,
+    "difficulty": "Easy",
+    "description": "File arsip ini seolah-olah kosong. Tapi setiap arsip punya daftar isi. Buka dengan hati-hati dan perhatikan nama file yang tersembunyi di dalamnya.",
+    "flag": "ITCLUB{1_c4n_s33_y0u}",
+    "file": "ms-02-archive.zip"
+  }
+]

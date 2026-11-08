@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Control Center — IT CLUB CTF ARENA</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Font modern: Plus Jakarta Sans (UI) + JetBrains Mono (flag/kode) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- ===================== GERBANG LOGIN ADMIN ===================== -->
+  <div id="login-view" class="gate">
+    <div class="gate-card glass">
+      <div class="gate-head">
+        <span class="logo">IT</span>
+        <div>
+          <h1>Admin <span class="grad-text">Control Center</span></h1>
+          <p>IT CLUB CTF ARENA · akses khusus role Admin</p>
+        </div>
+      </div>
+
+      <form id="login-form" class="stack" novalidate>
+        <div>
+          <label for="admin-username">Username Admin</label>
+          <div class="field with-icon">
+            <span class="prefix">@</span>
+            <input id="admin-username" type="text" maxlength="24" autocomplete="username"
+                   placeholder="admin" required />
+          </div>
+        </div>
+        <div>
+          <label for="adminPassword">Password</label>
+          <div class="password-field-wrapper">
+            <input type="password" id="adminPassword" maxlength="72" autocomplete="current-password"
+                   placeholder="••••••••" required />
+            <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('adminPassword', this)"
+                    title="Tampilkan/Sembunyikan Kata Sandi" aria-label="Tampilkan/Sembunyikan Kata Sandi">👁️</button>
+          </div>
+        </div>
+
+        <p id="login-error" class="form-error hidden"></p>
+
+        <button type="submit" class="btn primary full">🔐 Masuk sebagai Admin</button>
+      </form>
+
+      <p class="gate-hint">
+        Akun default: <code>admin / admin123</code> — ubah lewat env
+        <code>ADMIN_PASSWORD</code> sebelum dipakai di VPS.
+      </p>
+      <a class="gate-back" href="/">← Kembali ke Arena</a>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <div id="dashboard-view" class="hidden">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo sm">IT</span>
+        <h1>IT CLUB <span class="grad-text">ADMIN</span></h1>
+      </div>
+      <div class="topbar-right">
+        <span class="badge role">🛡️ Admin</span>
+        <span class="badge user" id="admin-who">@admin</span>
+        <button id="btn-logout" class="btn ghost">Keluar</button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="soal" role="tab">📋 Manajemen Soal</button>
+      <button class="tab" data-tab="peserta" role="tab">👥 Peserta &amp; Leaderboard</button>
+      <button class="tab" data-tab="audit" role="tab">🧾 Audit Log Submisi</button>
+    </nav>
+
+    <main class="wrap">
+      <!-- Stat ringkas -->
+      <section class="stats">
+        <div class="stat glass"><span class="stat-k">Total Soal</span><span class="stat-v" id="stat-total">0</span></div>
+        <div class="stat glass"><span class="stat-k">Soal Aktif</span><span class="stat-v acc" id="stat-active">0</span></div>
+        <div class="stat glass"><span class="stat-k">Peserta</span><span class="stat-v" id="stat-users">0</span></div>
+        <div class="stat glass"><span class="stat-k">Submisi Tercatat</span><span class="stat-v" id="stat-audit">0</span></div>
+      </section>
+
+      <!-- ========== TAB 1: MANAJEMEN SOAL ========== -->
+      <section id="tab-soal" class="tab-panel">
+        <!-- Form tambah / edit -->
+        <div class="card glass" id="challenge-form-card">
+          <div class="card-head">
+            <h2 id="challenge-form-title">➕ Tambah Soal Baru</h2>
+            <span class="hint" id="challenge-form-hint">ID &amp; status dibuat otomatis</span>
+          </div>
+
+          <form id="challenge-form" class="grid-form" novalidate>
+            <div class="col-2">
+              <label for="ch-title">Judul Soal / Challenge Name</label>
+              <input id="ch-title" type="text" maxlength="120" placeholder="cth. CyberNusa Vault" required />
+            </div>
+
+            <div>
+              <label for="ch-category">Kategori</label>
+              <select id="ch-category">
+                <option>Web Exploitation</option>
+                <option>Binary Exploitation</option>
+                <option>Digital Forensics</option>
+                <option>Cryptography</option>
+                <option>Reverse Engineering</option>
+                <option>Boot2Root</option>
+                <option>Misc</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="ch-difficulty">Level Kesulitan</label>
+              <select id="ch-difficulty">
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="ch-points">Poin</label>
+              <input id="ch-points" type="number" min="0" max="99999" step="1" value="500" required />
+            </div>
+
+            <div>
+              <label for="ch-url">Link Soal (opsional — mis. Google Drive)</label>
+              <input id="ch-url" type="url" placeholder="https://drive.google.com/..." />
+            </div>
+
+            <div class="col-2">
+              <label for="ch-description">Deskripsi Soal (Markdown / teks)</label>
+              <textarea id="ch-description" rows="7"
+                        placeholder="Tulis deskripsi… akhirkan dengan:&#10;---&#10;Target : http://&lt;SERVER_IP&gt;:8080&#10;Format : ITCLUB{...}"></textarea>
+            </div>
+
+            <div>
+              <label for="ch-file">Upload File Soal (.zip, .pdf, .txt, dll.)</label>
+              <input id="ch-file" type="file" accept=".zip,.rar,.7z,.tar,.gz,.pdf,.txt,.md,.png,.jpg,.jpeg,.gif,.webp,.pcap,.pcapng,.enc,.elf,.bin,.exe,.apk,.py,.c,.cpp,.h,.sh,.json,.csv,.log,.key,.pub,.docx,.xlsx" />
+              <p class="hint" id="ch-file-hint">Belum ada lampiran.</p>
+            </div>
+
+            <div>
+              <label for="ch-flag">Kunci Flag</label>
+              <input id="ch-flag" type="text" class="mono" placeholder="ITCLUB{flag_jawaban_rahasia}" required />
+            </div>
+
+            <div class="col-2 row-inline hidden" id="ch-detach-row">
+              <label class="check">
+                <input type="checkbox" id="ch-detach" />
+                Lepas lampiran yang terpasang
+              </label>
+            </div>
+
+            <div class="col-2 form-actions">
+              <button type="submit" class="btn primary" id="ch-submit">💾 Simpan Soal</button>
+              <button type="button" class="btn ghost hidden" id="ch-cancel">Batal Edit</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tabel daftar soal -->
+        <div class="card glass">
+          <div class="card-head">
+            <h2>Daftar Soal</h2>
+            <span class="hint" id="ch-count">–</span>
+          </div>
+          <div class="table-wrap">
+            <table id="ch-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Judul</th><th>Kategori</th><th>Kesulitan</th>
+                  <th>Poin</th><th>Status</th><th class="right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ch-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TAB 2: PESERTA & LEADERBOARD ========== -->
+      <section id="tab-peserta" class="tab-panel hidden">
+        <div class="card glass toolbar">
+          <div>
+            <h2>Reset Leaderboard</h2>
+            <p class="hint">Kosongkan seluruh poin &amp; riwayat soal peserta untuk memulai sesi kompetisi baru. Akun tetap tersimpan.</p>
+          </div>
+          <button id="btn-reset-leaderboard" class="btn danger">🔄 Reset Leaderboard</button>
+        </div>
+
+        <div class="card glass">
+          <div class="card-head">
+            <h2>Daftar User</h2>
+            <span class="hint" id="users-count">–</span>
+          </div>
+          <div class="table-wrap">
+            <table id="users-table">
+              <thead>
+                <tr>
+                  <th>Username</th><th>Nama Lengkap</th><th>Total Poin</th>
+                  <th>Soal Selesai</th><th>Peran</th><th class="right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="users-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TAB 3: AUDIT LOG ========== -->
+      <section id="tab-audit" class="tab-panel hidden">
+        <div class="card glass">
+          <div class="card-head">
+            <h2>Riwayat Submisi Flag</h2>
+            <span class="hint" id="audit-count">–</span>
+          </div>
+          <div class="table-wrap">
+            <table id="audit-table">
+              <thead>
+                <tr><th>Waktu</th><th>Peserta</th><th>Soal</th><th>Status</th></tr>
+              </thead>
+              <tbody id="audit-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===================== MODAL KONFIRMASI / PROMPT ===================== -->
+  <div id="ask-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div id="ask-backdrop" class="modal-backdrop"></div>
+    <div class="modal-card glass">
+      <h3 id="ask-title">Konfirmasi</h3>
+      <p id="ask-message"></p>
+      <input id="ask-input" type="text" class="hidden" maxlength="72" />
+      <div class="modal-actions">
+        <button id="ask-cancel" class="btn ghost">Batal</button>
+        <button id="ask-ok" class="btn primary">Ya</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast-container"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

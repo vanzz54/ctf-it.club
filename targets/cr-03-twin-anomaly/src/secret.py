@@ -1,0 +1,1 @@
+flag = b"ITCLUB{MD5_C0ll1s10n_1s_4lw4y5_F4t4l_9921}"

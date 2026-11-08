@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./app
+    ports:
+      - "6060:3000"
+    environment:
+      - FLAG=ITCLUB{N3xtJ5_1m4g3_0pt1m1z4t10n_55RF_M4st3r}
+    networks:
+      - chall4_net
+
+networks:
+  chall4_net:
+    driver: bridge

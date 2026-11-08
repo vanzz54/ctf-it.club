@@ -1,0 +1,7 @@
+services:
+  chall_1_ret2win:
+    build: .
+    ports:
+      - "9001:9001"
+    restart: always
+    container_name: binex_chall_1

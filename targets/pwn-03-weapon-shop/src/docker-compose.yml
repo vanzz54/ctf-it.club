@@ -1,0 +1,7 @@
+services:
+  chall_3_intovf:
+    build: .
+    ports:
+      - "9003:9003"
+    restart: always
+    container_name: binex_chall_3

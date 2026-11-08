@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberNusa - Documents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/dashboard.html" class="navbar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            CyberNusa
+        </a>
+        <div class="navbar-nav">
+            <a href="/dashboard.html" class="nav-link">Announcements</a>
+            <a href="/documents.html" class="nav-link" style="color: var(--primary); font-weight: 600;">Documents</a>
+            <a href="/profile.html" class="nav-link">My Profile</a>
+            <a href="/admin.html" class="nav-link" id="adminMenuLink" style="display: none; color: var(--danger);">Admin Panel</a>
+            <a href="#" id="logoutBtn" class="nav-link">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-bottom: 2rem; color: var(--dark);">Internal Documents & Policies</h2>
+        
+        <div class="card">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 1rem; border-bottom: 2px solid var(--light);">Document Name</th>
+                        <th style="text-align: left; padding: 1rem; border-bottom: 2px solid var(--light);">Category</th>
+                        <th style="text-align: left; padding: 1rem; border-bottom: 2px solid var(--light);">Last Updated</th>
+                        <th style="text-align: left; padding: 1rem; border-bottom: 2px solid var(--light);">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="documentList">
+                    <tr><td colspan="4">Loading documents...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Check admin logic just to show/hide menu
+        fetch('/api/profile').then(r => r.json()).then(u => {
+            if(u.access_level_id === 1) document.getElementById('adminMenuLink').style.display = 'block';
+        }).catch(e => console.error(e));
+    </script>
+</body>
+</html>

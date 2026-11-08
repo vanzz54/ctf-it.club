@@ -1,0 +1,11 @@
+// Stack Buffer Overflow Challenge
+#include <stdio.h>
+#include <string.h>
+void win_hidden() {
+    FILE *f = fopen("flag.txt", "r");
+    if (f) { char flag[64]; fgets(flag, 64, f); printf("FLAG: %s\n", flag); fclose(f); }
+}
+void vulnerable_function() {
+    char buffer[64]; printf("Masukkan password: "); fflush(stdout); gets(buffer);
+}
+int main() { setvbuf(stdin, NULL, _IONBF, 0); printf("=== Login System ===\n"); vulnerable_function(); return 0; }

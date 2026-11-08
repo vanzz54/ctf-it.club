@@ -1,0 +1,7 @@
+services:
+  chall_2_fmtstr:
+    build: .
+    ports:
+      - "9002:9002"
+    restart: always
+    container_name: binex_chall_2

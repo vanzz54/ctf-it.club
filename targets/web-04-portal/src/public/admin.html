@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberNusa - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/dashboard.html" class="navbar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            CyberNusa
+        </a>
+        <div class="navbar-nav">
+            <a href="/dashboard.html" class="nav-link">Announcements</a>
+            <a href="/documents.html" class="nav-link">Documents</a>
+            <a href="/profile.html" class="nav-link">My Profile</a>
+            <a href="/admin.html" class="nav-link" id="adminMenuLink" style="display: none; color: var(--danger); font-weight: 600;">Admin Panel</a>
+            <a href="#" id="logoutBtn" class="nav-link">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title" style="color: var(--danger);">Administrator Dashboard</h2>
+            <div id="alertBox" class="alert"></div>
+            
+            <div class="form-group">
+                <label class="form-label">Search Employees by Department</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="searchDept" class="form-control" placeholder="e.g. IT, HR, Finance">
+                    <button id="searchBtn" class="btn btn-primary">Search</button>
+                </div>
+                <small style="color: var(--secondary); margin-top: 5px; display: block;">Authorized personnel only. All queries are logged.</small>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Position</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeResults">
+                        <!-- Results will appear here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Output error box to help with SQLi -->
+            <pre id="debugOutput" style="display: none; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 8px; margin-top: 1rem; white-space: pre-wrap; word-break: break-all;"></pre>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+// Format String Challenge
+#include <stdio.h>
+#include <stdlib.h>
+void secret() { printf("SELAMAT! You found the secret function\n"); FILE *f = fopen("flag.txt", "r"); if (f) { char flag[64]; fgets(flag, 64, f); printf("FLAG: %s\n", flag); fclose(f); } }
+int main() {
+    char input[128]; volatile int *secret_ptr = (volatile int *)0x400123;
+    printf("Masukkan sesuatu: "); fflush(stdout); fgets(input, sizeof(input), stdin);
+    printf(input);
+    if (secret_ptr == 0x400123) secret();
+    return 0;
+}

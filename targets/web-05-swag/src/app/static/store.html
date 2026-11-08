@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberNusa Swag Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/store.html" class="navbar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            CyberNusa Swag Store
+        </a>
+        <div class="navbar-nav">
+            <span id="usernameDisplay" style="color: var(--text-light); margin-right: 1rem;"></span>
+            <a href="#" id="logoutBtn" class="nav-link">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="grid-2">
+            <!-- Left Column: Store Catalog -->
+            <div>
+                <h2 style="margin-bottom: 1.5rem; color: var(--light);">Store Catalog</h2>
+                <div class="item-grid" id="storeCatalog">
+                    <!-- Loaded dynamically -->
+                    <p>Loading items...</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Balance & Inventory -->
+            <div>
+                <div class="card balance-card">
+                    <p style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">Your Balance</p>
+                    <div class="balance-amount" id="userBalance">$0</div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--light); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Your Inventory</h3>
+                    <div class="inventory-list" id="userInventory">
+                        <!-- Loaded dynamically -->
+                        <p style="color: var(--text-light); text-align: center; margin-top: 1rem;">Inventory is empty</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

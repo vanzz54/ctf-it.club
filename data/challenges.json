@@ -1,0 +1,167 @@
+[
+  {
+    "id": "w1-login",
+    "title": "Login Lupa Kata",
+    "category": "Web Exploitation",
+    "difficulty": "Easy",
+    "points": 150,
+    "description": "Halaman login yang sederhana. Terdapat celah di query database. Berhasil bypass autentikasi, akses panel admin, dan dapat mengambil flag dari server.",
+    "flag": "ITCLUB{sql1_1s_s1mpl3_m1sm4n}",
+    "file": "w1-login-chall.zip",
+    "disabled": false
+  },
+  {
+    "id": "w2-vuln-auth",
+    "title": "Cari yang Hilang",
+    "category": "Web Exploitation",
+    "difficulty": "Medium",
+    "points": 300,
+    "description": "Sistem autentikasi lemah yang menggunakan hash MD5 tanpa salt. Kombinasi dengan timpa ID sesi memungkinkan akses ke seluruh data pengguna.",
+    "flag": "ITCLUB{md5_n0salt_d4sh1s_s3cur3}",
+    "file": "w2-auth-chall.zip",
+    "disabled": false
+  },
+  {
+    "id": "w3-lautan-binir",
+    "title": "Lautan Binir",
+    "category": "Web Exploitation",
+    "difficulty": "Hard",
+    "points": 450,
+    "description": "Tumpukan kerentanan: SQL Injection, upload_file bypass, dan command injection. Urutkan eksploitasi untuk mendapatkan shell dan baca flag server.",
+    "flag": "ITCLUB{s1q1_0v3rfl0w_1n_pl4t3_fl00r}",
+    "file": "w3-multi-chall.zip",
+    "disabled": false
+  },
+  {
+    "id": "o1-kucing",
+    "title": "Nama Kucing",
+    "category": "OSINT",
+    "difficulty": "Easy",
+    "points": 100,
+    "description": "Telusuri jejak digital siswa di forum publik. Temukan username akun dan password hint untuk membuka file terlarang.",
+    "flag": "ITCLUB{kucing_pintar_dunia_tweets}",
+    "file": "o1-forum-data.txt",
+    "disabled": false
+  },
+  {
+    "id": "o2-jejak-diri",
+    "title": "Jejak Digital",
+    "category": "OSINT",
+    "difficulty": "Medium",
+    "points": 200,
+    "description": "Gabungkan geolokasi, EXIF foto, dan posting media sosial. Rekonstruksi lokasi rumah siswa dan temukan akun tersembunyi.",
+    "flag": "ITCLUB{cam1ra_s1rg4_sampe_je1l}",
+    "file": "o2-evidence.zip",
+    "disabled": false
+  },
+  {
+    "id": "o3-social-web",
+    "title": "Social Web",
+    "category": "OSINT",
+    "difficulty": "Hard",
+    "points": 350,
+    "description": "Analisis graf sosial lintas platform. Rapikan hubungan antar akun untuk mengidentifikasi orang kunci dan akun yang menghubungkan dua individu.",
+    "flag": "ITCLUB{ssn_gabungan_3_4rch_1s_5tr3ss}",
+    "file": "o3-social-data.zip",
+    "disabled": false
+  },
+  {
+    "id": "p1-stack-buffer",
+    "title": "Stack Buffer",
+    "category": "Pwn",
+    "difficulty": "Easy",
+    "points": 200,
+    "description": "Program C dengan buffer overflow di fungsi tertentu. Overflow buffer untuk meng-overwrite return address dan memanggil fungsi winHidden yang berisi flag.",
+    "flag": "ITCLUB{stack_0v3rflow_ret2win}",
+    "file": "p1-stack-binary",
+    "disabled": false
+  },
+  {
+    "id": "p2-format-string",
+    "title": "Format String",
+    "category": "Pwn",
+    "difficulty": "Medium",
+    "points": 300,
+    "description": "Program yang mencetak input user tanpa validasi. Eksploitasi format string untuk membaca alamat memori dan menulis ke fungsi pointer.",
+    "flag": "ITCLUB{format_str_4tur4n_0verwrite}",
+    "file": "p2-format-binary",
+    "disabled": false
+  },
+  {
+    "id": "p3-heap-hacking",
+    "title": "Heap Hacking",
+    "category": "Pwn",
+    "difficulty": "Hard",
+    "points": 450,
+    "description": "Program dengan heap overflow dan use-after-free. UAF trigger, heap spray, ret2libc untuk mendapatkan arbitrary read/write dan baca flag.",
+    "flag": "ITCLUB{4r6_r34d_4nd_wr1t3_0n_heap}",
+    "file": "p3-heap-binary",
+    "disabled": false
+  },
+  {
+    "id": "c1-pergeseran",
+    "title": "Pergeseran",
+    "category": "Cryptography",
+    "difficulty": "Easy",
+    "points": 100,
+    "description": "Pesan terenkripsi Caesar cipher dengan shift 13. Dekripsi kembali pesan untuk mendapatkan path-flag.",
+    "flag": "ITCLUB{r0t13_m4k3s_th3_w0rld_g0_r0und}",
+    "file": "c1-caesar.txt",
+    "disabled": false
+  },
+  {
+    "id": "c2-vigenere",
+    "title": "Vigen\u00e8re",
+    "category": "Cryptography",
+    "difficulty": "Medium",
+    "points": 200,
+    "description": "Pesan dienkripsi Vigen\u00e8re dengan key yang dapat ditebak dari konteks. Dekripsi untuk mendapatkan path flag.",
+    "flag": "ITCLUB{v1g3n3r3_c1ph3r_m4d3_th3_f1ght}",
+    "file": "c2-vigenere.txt",
+    "disabled": false
+  },
+  {
+    "id": "c3-rsa-retro",
+    "title": "RSA Retro",
+    "category": "Cryptography",
+    "difficulty": "Hard",
+    "points": 350,
+    "description": "Tiga ciphertext yang dienkripsi dengan RSA dengan e=3. Gunakan Hittman's attack untuk merekonstruksi plaintext.",
+    "flag": "ITCLUB{h1ttm4n_s_attack_cr4ck3d_th3_rsa}",
+    "file": "c3-rsa-cipher.txt",
+    "disabled": false
+  },
+  {
+    "id": "f1-tuli",
+    "title": "Tuli",
+    "category": "Forensics",
+    "difficulty": "Easy",
+    "points": 120,
+    "description": "Steganografi LSB di dalam gambar PNG. Ekstrak bit LSB untuk mendapatkan pesan tersembunyi yang berupa path flag.",
+    "flag": "ITCLUB{h1dd3n_1n_th3_p1x3ls}",
+    "file": "f1-pixel-steg.png",
+    "disabled": false
+  },
+  {
+    "id": "f2-zip-rescue",
+    "title": "ZIP Rescue",
+    "category": "Forensics",
+    "difficulty": "Medium",
+    "points": 200,
+    "description": "File ZIP rusak. Carving atas data yang tersisa. Temukan portion yang dapat dibaca dan dapatkan pesan yang berisi path flag.",
+    "flag": "ITCLUB{z1p_st3g_1s_d1ff1cult}",
+    "file": "f2-zip-cracked.zip",
+    "disabled": false
+  },
+  {
+    "id": "f3-memory-blues",
+    "title": "Memory Blues",
+    "category": "Forensics",
+    "difficulty": "Hard",
+    "points": 350,
+    "description": "Memory dump server. Gunakan Volatility untuk menganalisis proses yang mencurigakan. Temukan flag tersimpan dalam memori.",
+    "flag": "ITCLUB{vol471ly_1s_l1k3_4_c0mpu7er}",
+    "file": "f3-memory-dump.raw",
+    "disabled": false
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "openrouterApiKey": "YOUR_OPENROUTER_API_KEY_HERE",
+  "openrouter": {
+    "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
+    "defaultModel": "google/gemini-2.0-flash-exp:free",
+    "fallbackModels": [
+      "meta-llama/llama-3.2-3b-instruct:free",
+      "mistralai/mistral-7b-instruct:free",
+      "qwen/qwen-2.5-coder-32b-instruct"
+    ],
+    "timeoutMs": 15000
+  },
+  "rateLimit": {
+    "perUser": 5,
+    "perIp": 20,
+    "windowMs": 60000
+  }
+}

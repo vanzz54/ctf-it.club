@@ -1,0 +1,13 @@
+// Heap Hacking Challenge
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+void show_flag() { FILE *f = fopen("flag.txt", "r"); if (f) { char flag[64]; fgets(flag, 64, f); printf("FLAG: %s\n", flag); fclose(f); } }
+struct node { char *data; struct node *next; };
+int main() {
+    struct node *head = malloc(sizeof(struct node)); head->data = malloc(32); head->next = NULL;
+    printf("Masukkan data: "); fflush(stdout); gets(head->data);
+    printf("Data: %s\n", head->data);
+    free(head); struct node *tmp = head; printf("After free: %s\n", tmp->data);
+    return 0;
+}

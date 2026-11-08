@@ -1,0 +1,10 @@
+# Tidak ikut ke image arena
+node_modules
+npm-debug.log*
+.git
+.gitignore
+targets
+README.md
+*.log
+# catatan: folder deploy/ TIDAK boleh dikecualikan —
+# arena.Dockerfile ada di folder itu dan dibaca Docker dari context ini.

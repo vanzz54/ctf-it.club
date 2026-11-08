@@ -1,0 +1,11 @@
+
+================================================================
+    KUNCI ENKRIPSI VIGENERE
+================================================================
+Pesan Terenkripsi (Vigenère): WKH VHFUHW LV WKH TXLFN EURZQ IRA MH
+WKH TXLFN EURZQ IRA GDH RXWHU
+Kunci: "WARFARE"
+Petunjuk: Kunci "WARFARE" digunakan untuk mengenkripsi setiap
+karakter pesan menggunakan tabel Vigenère.
+Jawaban: ITCLUB{...}
+================================================================
